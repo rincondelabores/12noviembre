@@ -15,7 +15,7 @@ body {
     color: var(--color-texto);
     line-height: 1.6;
     margin: 0;
-    padding: 20px;
+    padding: 0; /* Sin padding en el body en móvil */
 }
 
 h1, h2 {
@@ -26,32 +26,34 @@ h1, h2 {
 }
 
 h1 {
-    font-size: 2.5rem;
+    font-size: 2.2rem; /* Ligeramente más pequeño para móvil */
     text-align: center;
-    margin: 0;
+    margin: 0 0 5px 0;
 }
 
 h2 {
-    font-size: 2rem;
+    font-size: 1.8rem; /* Ligeramente más pequeño para móvil */
     border-bottom: 2px solid var(--color-acento);
     padding-bottom: 5px;
 }
 
 header p {
     text-align: center;
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: var(--color-texto-claro);
     margin-top: -5px;
 }
 
-/* --- Contenedor Principal --- */
+/* --- Contenedor Principal (MÓVIL PRIMERO) --- */
 .container {
-    max-width: 700px;
+    width: 100%;
     margin: 0 auto;
     background: #fff;
-    padding: 20px 40px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    padding: 20px 15px; /* Menos padding lateral en móvil */
+    box-sizing: border-box; /* Importante para que el padding no desborde */
+    box-shadow: none;
+    border-radius: 0;
+    min-height: 100vh; /* Ocupa al menos toda la altura de la pantalla */
 }
 
 /* --- Barra de Progreso --- */
@@ -64,7 +66,8 @@ header p {
     padding: 5px 10px;
     color: var(--color-borde);
     border-bottom: 3px solid var(--color-borde);
-    font-size: 0.9rem;
+    font-size: 0.8rem; /* Más pequeño en móvil */
+    text-align: center;
 }
 .step-indicator.active {
     color: var(--color-principal);
@@ -107,11 +110,11 @@ input[type="text"],
 input[type="number"],
 select {
     width: 100%;
-    padding: 12px;
+    padding: 14px; /* Ligeramente más alto para mejor tacto */
     border: 1px solid var(--color-borde);
     border-radius: 5px;
-    box-sizing: border-box; /* Importante para que el padding no afecte el ancho */
-    font-size: 1rem;
+    box-sizing: border-box; 
+    font-size: 1rem; /* Mantiene 1rem para evitar zoom en iOS */
 }
 input:focus, select:focus {
     border-color: var(--color-principal);
@@ -126,12 +129,12 @@ input:focus, select:focus {
     gap: 10px;
 }
 .toggle-group input[type="radio"] {
-    display: none; /* Ocultamos el radio button real */
+    display: none; 
 }
 .toggle-group label {
     padding: 10px 15px;
     border: 1px solid var(--color-borde);
-    border-radius: 50px; /* Estilo píldora */
+    border-radius: 50px; 
     cursor: pointer;
     transition: all 0.2s ease;
     font-weight: 400;
@@ -144,22 +147,26 @@ input:focus, select:focus {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* --- Botones de Navegación --- */
+/* --- Botones de Navegación (MÓVIL) --- */
 .nav-buttons {
     display: flex;
     justify-content: space-between;
     margin-top: 30px;
     border-top: 1px solid #eee;
     padding-top: 20px;
+    gap: 10px; /* Espacio entre botones */
 }
 button {
-    padding: 12px 20px;
+    padding: 14px 20px; /* Más altos para móvil */
     border: none;
     border-radius: 5px;
     font-size: 1rem;
     cursor: pointer;
     font-weight: 600;
     transition: all 0.2s ease;
+    flex-grow: 1; /* Crecen para ocupar el espacio */
+    flex-basis: 0; /* Asegura que se repartan 50/50 */
+    text-align: center;
 }
 button.btn-next, button.btn-submit {
     background-color: var(--color-acento);
@@ -180,7 +187,11 @@ button.btn-prev:hover, button.btn-start-over:hover {
     display: none;
 }
 #step-1 .nav-buttons {
-    justify-content: flex-end; /* Alinear el primer "Siguiente" a la derecha */
+    justify-content: flex-end; 
+}
+/* Si solo hay un botón, que ocupe todo */
+#step-1 .nav-buttons .btn-next {
+    flex-grow: 1;
 }
 
 /* --- Alertas y Validación --- */
@@ -203,7 +214,7 @@ input:invalid {
 /* --- Contenedor de Resultados --- */
 #resultado-container {
     background: #fdfdfd;
-    padding: 20px;
+    padding: 15px; /* Menos padding en móvil */
     border-radius: 5px;
     border: 1px solid #eee;
 }
@@ -216,15 +227,15 @@ input:invalid {
     margin-top: 20px;
 }
 pre {
-    background: #282c34; /* Fondo oscuro para JSON */
+    background: #282c34; 
     color: #abb2bf;
     padding: 15px;
     border-radius: 5px;
-    overflow-x: auto; /* Scroll horizontal si el JSON es largo */
+    overflow-x: auto; 
     font-size: 0.9rem;
 }
 #instrucciones-texto {
-    font-size: 1.1rem;
+    font-size: 1rem; /* Tamaño de texto base para móvil */
     line-height: 1.7;
 }
 #instrucciones-texto ol {
@@ -232,4 +243,49 @@ pre {
 }
 #instrucciones-texto li {
     margin-bottom: 15px;
+}
+
+/* --- Oculta el bloque JSON al tejedor --- */
+#json-container {
+    display: none;
+}
+
+
+/* ------------------------------------------- */
+/* --- ESTILOS PARA ESCRITORIO (Media Query) --- */
+/* ------------------------------------------- */
+@media (min-width: 600px) {
+    body {
+        padding: 20px; /* Re-añadimos padding al body en escritorio */
+    }
+
+    .container {
+        max-width: 700px; /* Límite de ancho en escritorio */
+        padding: 20px 40px; /* Padding de escritorio */
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        min-height: auto; /* Altura automática en escritorio */
+    }
+
+    h1 {
+        font-size: 2.5rem; /* Título más grande en escritorio */
+    }
+    
+    h2 {
+         font-size: 2rem;
+    }
+
+    .step-indicator {
+        font-size: 0.9rem;
+    }
+
+    #instrucciones-texto {
+        font-size: 1.1rem; /* Texto de instrucciones más grande */
+    }
+
+    /* Botones recuperan su tamaño natural */
+    .nav-buttons button {
+        flex-grow: 0; 
+        flex-basis: auto;
+    }
 }
