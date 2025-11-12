@@ -265,6 +265,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const largo_manga_cm = tallaData.manga;
         const pasadas_cuerpo = Math.round(largo_cuerpo_cm * rows_cm);
         const pasadas_manga = Math.round(largo_manga_cm * rows_cm);
+        
+        // **** ¡NUEVO! CÁLCULO DE MENGUADOS DE MANGA ****
+        // 1. Puntos objetivo del puño (Muñeca + 2cm holgura, redondeado a par)
+        const sts_muneca_final = Math.round((tallaData.muneca + 2) * pts_cm / 2) * 2;
+        
+        // 2. Total de puntos a menguar
+        let puntos_a_menguar = puntos_manga_total - sts_muneca_final;
+        if (puntos_a_menguar < 0) puntos_a_menguar = 0; // No menguar si el puño es más ancho
+        if (puntos_a_menguar % 2 !== 0) puntos_a_menguar -= 1; // Asegurar que sea par (1 a cada lado)
+            
+        // 3. Número de veces que menguamos
+        const num_menguados_pares = puntos_a_menguar / 2; 
+        
+        // 4. Frecuencia
+        let frecuencia_menguado = 0;
+        let pasadas_para_menguar = pasadas_manga - 10; // Dejamos 10 pasadas para el elástico del puño
+        
+        if (num_menguados_pares > 0 && pasadas_para_menguar > 0) {
+            frecuencia_menguado = Math.floor(pasadas_para_menguar / num_menguados_pares);
+            if (frecuencia_menguado < 2) frecuencia_menguado = 2; // No menguar más rápido que cada 2 pasadas
+        }
+        
+        let instruccion_menguado = `Teje recto por **${pasadas_manga}** pasadas (aprox ${largo_manga_cm} cm).`; // Default si no hay menguados
+        if (num_menguados_pares > 0) {
+            instruccion_menguado = `Para dar forma a la manga, **mengua 1 punto a cada lado** (al inicio y al final de la pasada) **cada ${frecuencia_menguado} pasadas**. Repite esto **${num_menguados_pares}** veces. (Quedarán ${sts_muneca_final}p). Continúa recto hasta alcanzar ${pasadas_manga} pasadas totales.`;
+        }
+        // **** FIN DEL CÁLCULO DE MENGUADOS ****
+        
 
         // --- D. GENERAR SALIDA ---
         
@@ -273,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Instrucciones limpias (versión anterior)
         const jsonOutput = {
-          "resumen": `Montar **${neck_cast_on}** puntos (Talla ${tallaData.display}). Reparto inicial: Espalda (${reparto.espalda}p), ${etiquetaDelantero}, Mangas (${reparto.manga}p c/u). Tejer ${sisa_pasadas} pasadas de raglán (${aumentos_rondas} rondas de aumento) hasta alcanzar **${total_sts_final_yoke}** puntos. Tejer mangas primero (montando ${puntos_sisa_montar}p en cada sisa) y luego el cuerpo.`,
+          "resumen": `Montar **${neck_cast_on}** puntos (Talla ${tallaData.display}). Reparto inicial: Espalda (${reparto.espalda}p), ${etiquetaDelantero}, Mangas (${reparto.manga}p c/u). Tejer ${sisa_pasadas} pasadas de raglán (${aumentos_rondas} rondas de aumento) hasta alcanzar **${total_sts_final_yoke}** puntos. Tejer mangas primero (montando ${puntos_sisa_montar}p en cada sisa y menguando) y luego el cuerpo.`,
           "parametros": {
             // ... (parametros internos, ocultos para el usuario)
           },
@@ -288,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <ul><li>**Pasada 1 (Derecho):** **Monta ${puntos_sisa_mitad}p nuevos** al inicio de la pasada. Teje hasta el final.</li>
                 <li>**Pasada 2 (Revés):** **Monta ${puntos_sisa_mitad}p nuevos** al inicio de la pasada. Teje hasta el final.</li></ul>
                 (Total **${puntos_manga_total}p** en la aguja).`,
-            `8. **Continuar Manga 1:** Teje recto por **${pasadas_manga}** pasadas (aprox ${largo_manga_cm} cm). Teje elástico de puño y cierra. Corta el hilo.`,
+            `8. **Continuar y Menguar Manga 1:** ${instruccion_menguado} Teje elástico de puño y cierra. Corta el hilo.`,
             `9. **Tejer Manga 2:** Retoma los **${sts_manga_final_real}p** de la Manga 2 y repite los pasos 7 y 8.`,
             `10. **Tejer Cuerpo (Segundo):** Retoma todos los puntos del cuerpo que tenías en espera (${ (esChaqueta ? (sts_delantero_final_real * 2) : sts_delantero_final_real) + sts_espalda_final_real}p).`,
             `11. **Unir Cuerpo con Mangas:** Teje el primer delantero. **Recoge ${puntos_sisa_montar}p** del borde de la sisa de la Manga 1 (del borde recto que montaste). Teje la Espalda. **Recoge ${puntos_sisa_montar}p** del borde de la sisa de la Manga 2. Teje el otro delantero. (Total **${puntos_cuerpo_total}p** en la aguja).`,
