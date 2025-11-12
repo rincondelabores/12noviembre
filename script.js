@@ -1,4 +1,4 @@
-// --- BASE DE DATOS DE TALLAS ---
+// --- BASE DE DATOS DE TALLAS (Mantenida) ---
 // Medidas corporales estándar en CM. La holgura se añade después.
 const SIZING_DATABASE = {
     // Bebés
@@ -30,11 +30,85 @@ const SIZING_DATABASE = {
 // --- FIN DE LA BASE DE DATOS ---
 
 
-// Espera a que todo el HTML esté cargado
+/**
+ * Distribuye los puntos iniciales del escote según la regla 1/3, 1/3, 1/3
+ * y ajusta los puntos sobrantes según la prioridad.
+ * @param {number} totalPuntos - Puntos totales del escote a repartir.
+ * @param {boolean} esChaqueta - True si la prenda es una chaqueta (dos delanteros).
+ * @returns {object} Puntos repartidos.
+ */
+function distribuirRagland(totalPuntos, esChaqueta) {
+    
+    // 1. Inicializar Puntos
+    let puntosEspalda, puntosDelantero, puntosManga;
+    let puntosRaglan = 4; // Los 4 puntos de las líneas de raglán (1p en cada línea)
+    let puntosARepartir = totalPuntos - puntosRaglan;
+
+    // 2. Reparto inicial 1/3
+    let parte = Math.floor(puntosARepartir / 3);
+    let sobrante = puntosARepartir % 3;
+
+    // Inicialización base
+    puntosEspalda = parte;
+    puntosDelantero = parte; // Inicialmente, delantero toma 1/3.
+    puntosManga = parte;     // Las dos mangas toman 1/3 en conjunto.
+
+    // 3. Gestión del Sobrante (Prioridad: Delantero > Espalda > Manga)
+    if (sobrante > 0) {
+        // Regla 1: Si sobra 1 punto, se le da a la ESPALDA (Para que quede impar o más grande que el delantero).
+        if (sobrante >= 1) {
+            puntosEspalda += 1;
+            sobrante -= 1;
+        }
+    }
+    
+    // Si el reparto de 1/3 del delantero es impar, se ajusta al repartir la manga (Ver paso 4).
+    // Es mejor que la espalda tenga más puntos para el cuello.
+
+    // 4. Ajustar Delantero y Mangas
+    
+    // 4.1. Delantero (Si es jersey, delantero = puntosDelantero. Si es chaqueta, delantero = puntosDelantero / 2)
+    if (esChaqueta) {
+        // Redondear el delantero para que sea par y poder dividirlo en dos
+        if (puntosDelantero % 2 !== 0) {
+            // Si es impar, se redondea cogiendo de la espalda o mangas.
+            // Para mantener la simetría, si es impar, lo mejor es darle un punto extra y quitarlo de la espalda.
+            puntosDelantero += 1;
+            puntosEspalda -= 1; 
+        }
+        puntosDelantero /= 2; // Repartir el delantero en dos (Delantero Izq y Der)
+        
+        // La regla indica que si ha de tener 2 más (que sean los delanteros y no la espalda).
+        // Si el punto extra se dio al delantero, la espalda ya lo perdió, cumpliendo la regla.
+    }
+    
+    // 4.2. Mangas (Repartir el 1/3 de la manga entre las 2)
+    // Regla: Las dos mangas deben ser iguales. Si sobra un punto, se da a la espalda.
+    if (puntosManga % 2 !== 0) {
+        puntosManga -= 1; // Quitar 1 punto de la manga total
+        puntosEspalda += 1; // Dárselo a la espalda
+    }
+    puntosManga /= 2; // Repartir la manga total en dos (Manga 1 y Manga 2)
+
+    // 5. Devolver Resultado
+    return {
+        puntoRagland: 1, // Punto de la línea de raglán
+        espalda: puntosEspalda,
+        delantero: esChaqueta ? puntosDelantero : puntosDelantero, // Si es jersey, es el total. Si es chaqueta, es un delantero.
+        manga: puntosManga,
+        esChaqueta: esChaqueta,
+        puntosTotalesChequeo: (esChaqueta ? (puntosDelantero * 2) : puntosDelantero) + puntosEspalda + (puntosManga * 2) + 4 // 4 = 4 líneas de raglán
+    };
+}
+
+
+// --- RESTO DEL SCRIPT DENTRO DE DOMContentLoaded ---
+
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- 1. MANEJO DE LA INTERFAZ (UI) DE PASOS ---
-    
+    // --- 1. MANEJO DE LA INTERFAZ (UI) DE PASOS (Mantenida) ---
+    // ... (El código de manejo de la interfaz de usuario se mantiene igual) ...
+
     const steps = document.querySelectorAll('.step');
     const indicators = document.querySelectorAll('.step-indicator');
     const nextButtons = document.querySelectorAll('.btn-next');
@@ -76,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
 
-    // --- 2. VALIDACIÓN EN TIEMPO REAL (Ejemplo) ---
+    // --- 2. VALIDACIÓN EN TIEMPO REAL (Mantenida) ---
 
     const ptsInput = document.getElementById('pts10');
     const rowsInput = document.getElementById('rows10');
@@ -98,19 +172,15 @@ document.addEventListener('DOMContentLoaded', () => {
     rowsInput.addEventListener('input', () => validateMuestra(rowsInput, rowsWarning));
 
 
-    // --- 3. LÓGICA DE CÁLCULO AL ENVIAR EL FORMULARIO ---
+    // --- 3. LÓGICA DE CÁLCULO AL ENVIAR EL FORMULARIO (Actualizada) ---
 
     form.addEventListener('submit', (e) => {
-        e.preventDefault(); // Evita que la página se recargue
+        e.preventDefault(); 
         
-        // Recolectar datos del formulario
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
         
-        // Iniciar el proceso de generación
         generarPatron(data);
-        
-        // Mostrar la pantalla de resultados
         showStep(4);
     });
 
@@ -122,12 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- A. RECOGER DATOS DE ENTRADA ---
         const pts10 = parseFloat(data.pts10);
         const rows10 = parseFloat(data.rows10);
-        const tallaId = data.talla; // p.ej. "primera-puesta", "3-6m", "38"
+        const tallaId = data.talla;
         const metodo = data.metodo;
+        const tipoPrenda = data.tipo_prenda; // 'chaqueta' o 'jersey'
+        const esChaqueta = (tipoPrenda === 'chaqueta');
 
         // --- B. COMPROBACIONES Y LÓGICA DE MVP ---
-        
-        // 1. Buscar la talla en la base de datos
         const tallaData = SIZING_DATABASE[tallaId];
         
         if (!tallaData) {
@@ -135,7 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 2. Por ahora, solo funciona el método Top-Down
         if (metodo !== 'top-down') {
             mostrarError("Lo sentimos, la lógica de cálculo para el método 'Bottom-Up' aún no está implementada en este MVP. Por favor, selecciona 'Top-Down (Raglán)'.");
             return;
@@ -143,113 +212,86 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- C. CÁLCULOS (Lógica Top-Down) ---
         
-        // 1. Variables intermedias
         const pts_cm = pts10 / 10;
         const rows_cm = rows10 / 10;
-        
-        // 2. Circunferencia objetivo (¡Ahora usa la base de datos!)
         const talla_cm = tallaData.pecho;
         
-        // TODO: Leer la holgura desde el input 'data.ajuste'
-        // Por ahora, usamos 5cm fijos (ajuste "normal" para bebé)
+        // HOLGURA: Usamos 5cm fijos (ajuste "normal")
         const ease_cm = 5.0; 
         const circ_obj_cm = talla_cm + ease_cm;
         
-        // 3. Puntos totales
-        const total_sts_teorico = circ_obj_cm * pts_cm;
-
-        // 4. Lógica de Raglán (Simplificada para este MVP)
-        // Usamos el cuello y la sisa de la base de datos
+        // Montaje del Cuello: Se usa la medida del cuello de la base de datos.
         const neck_cm = tallaData.cuello;
         const neck_cast_on_teorico = neck_cm * pts_cm;
+        const neck_cast_on = Math.round(neck_cast_on_teorico / 2) * 2; // Redondeo a múltiplo de 2 (par)
         
-        // --- Lógica de redondeo y ajuste (MUY simplificada) ---
-        // Ajustamos el montaje a un múltiplo de 2
-        const neck_cast_on = Math.round(neck_cast_on_teorico / 2) * 2;
-        
-        // Calculamos los aumentos necesarios
+        // Reparto de los puntos iniciales (¡Nueva lógica!)
+        const reparto = distribuirRagland(neck_cast_on, esChaqueta);
+
+        // Aumentos necesarios
         const sisa_pasadas = Math.round(tallaData.sisa * rows_cm);
-        // Si tejemos plano, 1 pasada de aumento cada 2 pasadas (solo pasadas del derecho)
         const aumentos_rondas = Math.floor(sisa_pasadas / 2);
+        const puntos_aumentados = aumentos_rondas * 8; 
+        const total_sts_final_yoke = reparto.puntosTotalesChequeo + puntos_aumentados;
         
-        const puntos_aumentados = aumentos_rondas * 8; // 8p por ronda de raglán
-        const total_sts_ajustado = neck_cast_on + puntos_aumentados;
+        // Puntos finales tras aumentos de raglán
+        const sts_delantero_final = reparto.delantero + (aumentos_rondas * 2);
+        const sts_espalda_final = reparto.espalda + (aumentos_rondas * 2);
+        const sts_manga_final = reparto.manga + (aumentos_rondas * 2);
         
-        
-        // 5. Cálculos de largo (¡Ahora usa la base de datos!)
+        // Puntos Cuerpo y Manga
+        const puntos_sisa_montar = Math.round(pts_cm * 2); // Montar 2cm en sisa (aproximado)
+        const puntos_cuerpo_total = (esChaqueta ? (sts_delantero_final * 2) : sts_delantero_final) + sts_espalda_final + (puntos_sisa_montar * 2);
+
+        // Cálculos de largo
         const largo_cuerpo_cm = tallaData.cuerpo;
         const largo_manga_cm = tallaData.manga;
         const pasadas_cuerpo = Math.round(largo_cuerpo_cm * rows_cm);
         const pasadas_manga = Math.round(largo_manga_cm * rows_cm);
-        
-        // 6. Distribución (Simplificada)
-        // Esto es un ejemplo, la lógica de distribución real es más compleja
-        const puntos_manga_aprox = Math.round((total_sts_ajustado * 0.2) / 2) * 2; // 20% para cada manga
-        const puntos_cuerpo_restantes = total_sts_ajustado - (puntos_manga_aprox * 2);
-        const puntos_espalda = Math.round((puntos_cuerpo_restantes / 2) / 2) * 2;
-        const puntos_delantero = puntos_cuerpo_restantes - puntos_espalda;
-        const puntos_sisa_montar = Math.round(pts_cm * 2); // Montar 2cm en sisa
-        const puntos_cuerpo_total = puntos_delantero + puntos_espalda + (puntos_sisa_montar * 2);
 
         // --- D. GENERAR SALIDA ---
         
-        // 7. Generar el JSON de salida
+        const etiquetaDelantero = esChaqueta ? `Delanteros (${sts_delantero_final}p c/u)` : `Delantero (${sts_delantero_final}p)`;
+
         const jsonOutput = {
-          "resumen": `Montar ${neck_cast_on} puntos para el cuello (Talla: ${tallaData.display}). Realizar ${aumentos_rondas} rondas de aumento de raglán (aprox ${tallaData.sisa} cm) hasta alcanzar ${total_sts_ajustado} puntos. Separar ${puntos_manga_aprox} puntos para cada manga. Continuar el cuerpo (${puntos_cuerpo_total} puntos) recto durante ${pasadas_cuerpo} pasadas (aprox ${largo_cuerpo_cm} cm).`,
+          "resumen": `Montar **${neck_cast_on}** puntos (Talla ${tallaData.display}). Reparto inicial: Espalda (${reparto.espalda}p), ${etiquetaDelantero}, Mangas (${reparto.manga}p c/u). Tejer ${sisa_pasadas} pasadas de raglán (${aumentos_rondas} rondas de aumento) hasta alcanzar **${total_sts_final_yoke}** puntos. Separar ${sts_manga_final}p para cada manga. Continuar el cuerpo (${puntos_cuerpo_total}p) con agujas rectas.`,
           "parametros": {
-            "pts10": pts10,
-            "rows10": rows10,
-            "pts_cm": pts_cm,
-            "rows_cm": rows_cm,
-            "talla_seleccionada": tallaId,
-            "talla_pecho_base_cm": talla_cm,
-            "ease_cm": ease_cm,
-            "circ_obj_cm": circ_obj_cm,
-            "total_sts_teorico": total_sts_teorico,
-            "total_sts_ajustado": total_sts_ajustado,
-            "neck_cast_on": neck_cast_on,
-            "pasadas_sisa": sisa_pasadas,
-            "pasadas_cuerpo": pasadas_cuerpo,
-            "pasadas_manga": pasadas_manga
+            "Talla": tallaData.display,
+            "Tipo_Prenda": tipoPrenda,
+            "Muestra": `${pts10} p / ${rows10} r (en 10cm)`,
+            "Neck_Cast_On": neck_cast_on,
+            "Reparto_Inicial": `E:${reparto.espalda}, D:${reparto.delantero}, M:${reparto.manga}`,
+            "Pasadas_Sisa_Raglan": sisa_pasadas,
+            "Puntos_Finales_Yoke": total_sts_final_yoke,
+            "Puntos_Cuerpo_Total": puntos_cuerpo_total,
+            "Pasadas_Cuerpo": pasadas_cuerpo,
+            "Pasadas_Manga": pasadas_manga
           },
           "instrucciones": [
-            `1. Montaje del cuello (Talla ${tallaData.display}): Montar ${neck_cast_on} puntos.`,
-            `2. Elástico: Tejer elástico (1x1 o 2x2) durante aprox 2-3 cm.`,
-            `3. Preparación Raglán: Distribuir puntos y colocar 4 marcadores de raglán (la lógica de distribución exacta debe implementarse).`,
-            `4. Aumentos Raglán: Tejer ${sisa_pasadas} pasadas (aprox ${tallaData.sisa} cm), realizando aumentos de raglán cada 2 pasadas (${aumentos_rondas} rondas de aumento).`,
-            `5. Resultado Tras Aumentos: Total ${total_sts_ajustado} puntos.`,
-            `6. Separación de Mangas: Poner ${puntos_manga_aprox} puntos de cada manga en espera. Montar ${puntos_sisa_montar} puntos nuevos para la sisa.`,
-            `7. Cuerpo: Continuar tejiendo los ${puntos_cuerpo_total} puntos del cuerpo durante ${pasadas_cuerpo} pasadas (aprox ${largo_cuerpo_cm} cm).`,
-            `8. Bajo: Tejer elástico y cerrar puntos.`,
-            `9. Mangas: Recoger ${puntos_manga_aprox} puntos en espera + ${puntos_sisa_montar} puntos de la sisa. Tejer recto durante ${pasadas_manga} pasadas (aprox ${largo_manga_cm} cm), disminuir para puño y cerrar.`
+            `1. **Montaje del Cuello:** Montar **${neck_cast_on}** puntos con agujas rectas. Une o no en redondo según sea jersey/chaqueta.`,
+            `2. **Elástico:** Tejer elástico (1x1 o 2x2) durante 2-3 cm.`,
+            `3. **Distribución de Puntos:** Marcar los puntos de inicio: ${esChaqueta ? `Delantero 1 (${reparto.delantero}p)` : `Delantero (${reparto.delantero}p)`}, Línea Raglán (1p), Manga 1 (${reparto.manga}p), Línea Raglán (1p), Espalda (${reparto.espalda}p), Línea Raglán (1p), Manga 2 (${reparto.manga}p), Línea Raglán (1p), ${esChaqueta ? `Delantero 2 (${reparto.delantero}p)` : ''}. **(Chequeo: ${reparto.puntosTotalesChequeo} puntos)**.`,
+            `4. **Aumentos Raglán:** Tejer en plano (agujas rectas) durante ${sisa_pasadas} pasadas, realizando **${aumentos_rondas} rondas de aumento** (cada 2 pasadas) a ambos lados de las 4 líneas de raglán.`,
+            `5. **Separación de Mangas:** Al finalizar los aumentos, los puntos serán **${total_sts_final_yoke}**. Poner los ${sts_manga_final}p de cada manga en espera. Montar ${puntos_sisa_montar}p bajo cada sisa para el cuerpo.`,
+            `6. **Tejer Mangas (Primero):** Retomar los ${sts_manga_final}p de una manga (más los ${puntos_sisa_montar}p si se desea coger el bajo sisa). Tejer en plano con agujas rectas por ${pasadas_manga} pasadas. Cerrar y tejer la segunda manga.`,
+            `7. **Tejer Cuerpo (Segundo):** Retomar los ${puntos_cuerpo_total}p restantes del cuerpo. Tejer en plano con agujas rectas por ${pasadas_cuerpo} pasadas.`,
+            `8. **Bajo:** Tejer elástico y cerrar todos los puntos.`
           ],
-          "advertencias": ["Resultados basados en lógica MVP (Top-Down). La distribución de puntos de raglán y las disminuciones de puño son aproximadas y deben detallarse."]
+          "advertencias": ["El cálculo del reparto inicial utiliza la regla 1/3, 1/3, 1/3 con tus ajustes de redondeo. Recuerda que la simetría es clave. El tejido es plano con agujas rectas."]
         };
 
-        // 8. Generar el texto HTML
-        const textoHTML = `
-            <ol>
-                ${jsonOutput.instrucciones.map(paso => `<li>${paso}</li>`).join('')}
-            </ol>
-            <div class="alert-critical">${jsonOutput.advertencias[0]}</div>
-        `;
-        
-        // 9. Mostrar los resultados
+        // Mostrar los resultados
         mostrarResultados(jsonOutput, textoHTML);
     }
 
-    /**
-     * Muestra los resultados en la pantalla
-     */
+    // --- FUNCIONES DE VISUALIZACIÓN (Mantenidas) ---
+
     function mostrarResultados(json, textoHTML) {
         document.getElementById('resumen-texto').textContent = json.resumen;
-        document.getElementById('json-output').textContent = JSON.stringify(json, null, 2); // 'null, 2' formatea el JSON
+        document.getElementById('json-output').textContent = JSON.stringify(json, null, 2); 
         document.getElementById('instrucciones-texto').innerHTML = textoHTML;
     }
 
-    /**
-     * Muestra un mensaje de error
-     */
     function mostrarError(mensaje) {
         document.getElementById('resumen-texto').textContent = "Error en el cálculo";
         document.getElementById('json-output').textContent = `{ "error": "${mensaje}" }`;
