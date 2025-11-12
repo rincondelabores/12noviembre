@@ -31,7 +31,7 @@ const SIZING_DATABASE = {
 
 /**
  * Distribuye los puntos iniciales del escote según la regla 1/3, 1/3, 1/3
- * y ajusta los puntos sobrantes según la prioridad. (VERSIÓN CORREGIDA)
+ * y ajusta los puntos sobrantes según la prioridad.
  */
 function distribuirRagland(totalPuntos, esChaqueta) {
     
@@ -137,6 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Maneja TODOS los botones "btn-prev" (los de Volver y Modificar Datos)
     prevButtons.forEach(button => {
         button.addEventListener('click', () => {
             if (currentStep > 1) {
@@ -178,17 +179,15 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', (e) => {
         e.preventDefault(); 
         
-        // **** Bloque TRY...CATCH para capturar errores ****
         try {
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
             generarPatron(data);
         } catch (error) {
-            console.error(error); // Muestra el error en la consola del navegador (F12)
+            console.error(error); 
             mostrarError(`Error crítico en el cálculo: ${error.message}`);
         }
         
-        // Muestra el paso 4, ya sea con resultados o con el error
         showStep(4);
     });
 
@@ -255,9 +254,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const total_sts_final_yoke = (esChaqueta ? (sts_delantero_final_real * 2) : sts_delantero_final_real) + sts_espalda_final_real + (sts_manga_final_real * 2) + 4; // +4 por los puntos de raglán
 
         // Puntos Cuerpo y Manga
-        const puntos_sisa_montar = Math.round(pts_cm * 2); // Montar 2cm en sisa (aprox)
-        const puntos_cuerpo_total = (esChaqueta ? (sts_delantero_final_real * 2) : sts_delantero_final_real) + sts_espalda_final_real + (puntos_sisa_montar * 2);
+        const puntos_sisa_montar = Math.round((pts_cm * 2) / 2) * 2; // (Aprox 2cm). Forzado a ser par.
+        const puntos_sisa_mitad = puntos_sisa_montar / 2; // Puntos a añadir a cada lado
+        
         const puntos_manga_total = sts_manga_final_real + puntos_sisa_montar;
+        const puntos_cuerpo_total = (esChaqueta ? (sts_delantero_final_real * 2) : sts_delantero_final_real) + sts_espalda_final_real + (puntos_sisa_montar * 2);
 
         // Cálculos de largo
         const largo_cuerpo_cm = tallaData.cuerpo;
@@ -270,44 +271,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const etiquetaDelantero = esChaqueta ? `Delanteros (${reparto.delantero}p c/u)` : `Delantero (${reparto.delantero}p)`;
         const etiquetaDelanteroFinal = esChaqueta ? `Delanteros (${sts_delantero_final_real}p c/u)` : `Delantero (${sts_delantero_final_real}p)`;
 
+        // Instrucciones limpias (versión anterior)
         const jsonOutput = {
-          "resumen": `Montar **${neck_cast_on}** puntos (Talla ${tallaData.display}). Reparto inicial: Espalda (${reparto.espalda}p), ${etiquetaDelantero}, Mangas (${reparto.manga}p c/u). Tejer ${sisa_pasadas} pasadas de raglán (${aumentos_rondas} rondas de aumento) hasta alcanzar **${total_sts_final_yoke}** puntos. Separar ${sts_manga_final_real}p para cada manga. Continuar el cuerpo (${puntos_cuerpo_total}p) con agujas rectas.`,
+          "resumen": `Montar **${neck_cast_on}** puntos (Talla ${tallaData.display}). Reparto inicial: Espalda (${reparto.espalda}p), ${etiquetaDelantero}, Mangas (${reparto.manga}p c/u). Tejer ${sisa_pasadas} pasadas de raglán (${aumentos_rondas} rondas de aumento) hasta alcanzar **${total_sts_final_yoke}** puntos. Tejer mangas primero (montando ${puntos_sisa_montar}p en cada sisa) y luego el cuerpo.`,
           "parametros": {
-            "Talla": tallaData.display,
-            "Tipo_Prenda": tipoPrenda,
-            "Muestra": `${pts10} p / ${rows10} r (en 10cm)`,
-            "Neck_Cast_On": neck_cast_on,
-            "Reparto_Inicial": `E:${reparto.espalda}, D:${reparto.delantero}, M:${reparto.manga}`,
-            "Pasadas_Sisa_Raglan": sisa_pasadas,
-            "Puntos_Finales_Yoke": total_sts_final_yoke,
-            "Puntos_Cuerpo_Total": puntos_cuerpo_total,
-            "Pasadas_Cuerpo": pasadas_cuerpo,
-            "Pasadas_Manga": pasadas_manga
+            // ... (parametros internos, ocultos para el usuario)
           },
           "instrucciones": [
             `1. **Montaje del Cuello:** Montar **${neck_cast_on}** puntos.`,
             `2. **Elástico:** Tejer elástico (1x1 o 2x2) durante 2-3 cm.`,
             `3. **Distribución de Puntos (Pasada de preparación):** Colocar marcadores. ${esChaqueta ? `Tejer ${reparto.delantero}p (Delantero Der), PM, 1p (Raglán), PM, ${reparto.manga}p (Manga 1), PM, 1p (Raglán), PM, ${reparto.espalda}p (Espalda), PM, 1p (Raglán), PM, ${reparto.manga}p (Manga 2), PM, 1p (Raglán), PM, ${reparto.delantero}p (Delantero Izq).` : `Tejer ${reparto.delantero}p (Delantero), PM, 1p (Raglán), PM, ${reparto.manga}p (Manga 1), PM, 1p (Raglán), PM, ${reparto.espalda}p (Espalda), PM, 1p (Raglán), PM, ${reparto.manga}p (Manga 2), PM, 1p (Raglán).`}`,
-            `4. **Aumentos Raglán:** Tejer en plano (agujas rectas) durante ${sisa_pasadas} pasadas, realizando **${aumentos_rondas} rondas de aumento** (cada 2 pasadas) a ambos lados de las 4 líneas de raglán.`,
-            `5. **Separación de Mangas:** Al finalizar los aumentos, los puntos serán: ${etiquetaDelanteroFinal}, Espalda (${sts_espalda_final_real}p), Mangas (${sts_manga_final_real}p c/u). Poner los ${sts_manga_final_real}p de cada manga en espera. Montar ${puntos_sisa_montar}p bajo cada sisa para el cuerpo.`,
-            `6. **Tejer Mangas (Primero):** Retomar los ${sts_manga_final_real}p de una manga y recoger los ${puntos_sisa_montar}p montados en la sisa (Total ${puntos_manga_total}p). Tejer en plano con agujas rectas por ${pasadas_manga} pasadas. Cerrar y tejer la segunda manga.`,
-            `7. **Tejer Cuerpo (Segundo):** Retomar los ${ (esChaqueta ? (sts_delantero_final_real * 2) : sts_delantero_final_real) + sts_espalda_final_real} puntos del cuerpo y recoger los ${puntos_sisa_montar * 2} puntos de ambas sisas (Total ${puntos_cuerpo_total}p). Tejer en plano con agujas rectas por ${pasadas_cuerpo} pasadas.`,
-            `8. **Bajo:** Tejer elástico y cerrar todos los puntos.`
+            `4. **Aumentos Raglán:** Tejer durante ${sisa_pasadas} pasadas, realizando **${aumentos_rondas} rondas de aumento** (cada 2 pasadas) a ambos lados de las 4 líneas de raglán.`,
+            `5. **Separación de Piezas:** Al finalizar los aumentos, los puntos serán: ${etiquetaDelanteroFinal}, Espalda (${sts_espalda_final_real}p), Mangas (${sts_manga_final_real}p c/u).`,
+            `6. **Tejer Manga 1 (Primero):** Poner los puntos del cuerpo (Delanteros y Espalda) en un hilo o aguja auxiliar. Quédate solo con los **${sts_manga_final_real}p** de la Manga 1 en tus agujas.`,
+            `7. **Montar Sisa Manga 1:** Sigue tejiendo:
+                <ul><li>**Pasada 1 (Derecho):** **Monta ${puntos_sisa_mitad}p nuevos** al inicio de la pasada. Teje hasta el final.</li>
+                <li>**Pasada 2 (Revés):** **Monta ${puntos_sisa_mitad}p nuevos** al inicio de la pasada. Teje hasta el final.</li></ul>
+                (Total **${puntos_manga_total}p** en la aguja).`,
+            `8. **Continuar Manga 1:** Teje recto por **${pasadas_manga}** pasadas (aprox ${largo_manga_cm} cm). Teje elástico de puño y cierra. Corta el hilo.`,
+            `9. **Tejer Manga 2:** Retoma los **${sts_manga_final_real}p** de la Manga 2 y repite los pasos 7 y 8.`,
+            `10. **Tejer Cuerpo (Segundo):** Retoma todos los puntos del cuerpo que tenías en espera (${ (esChaqueta ? (sts_delantero_final_real * 2) : sts_delantero_final_real) + sts_espalda_final_real}p).`,
+            `11. **Unir Cuerpo con Mangas:** Teje el primer delantero. **Recoge ${puntos_sisa_montar}p** del borde de la sisa de la Manga 1 (del borde recto que montaste). Teje la Espalda. **Recoge ${puntos_sisa_montar}p** del borde de la sisa de la Manga 2. Teje el otro delantero. (Total **${puntos_cuerpo_total}p** en la aguja).`,
+            `12. **Continuar Cuerpo:** Teje recto por **${pasadas_cuerpo}** pasadas (aprox ${largo_cuerpo_cm} cm).`,
+            `13. **Bajo:** Tejer elástico y cerrar todos los puntos.`
           ],
-          "advertencias": ["El cálculo del reparto inicial utiliza la regla 1/3, 1/3, 1/3 con tus ajustes de redondeo. El tejido es plano con agujas rectas."]
+          "advertencias": [] // Vaciado
         };
         
-        // **** INICIO DEL CÓDIGO CORREGIDO (ESTO FALTABA) ****
-        // Generar el texto HTML a partir del JSON
+        // Generar el texto HTML a partir del JSON (limpio)
         const textoHTML = `
             <ol>
                 ${jsonOutput.instrucciones.map(paso => `<li>${paso.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('')}
             </ol>
-            <div class="alert-critical">${jsonOutput.advertencias[0]}</div>
         `;
-        // **** FIN DEL CÓDIGO CORREGIDO ****
 
-        // Esta es la línea 318 (aprox) que daba el error. Ahora "textoHTML" SÍ existe.
+        // Mostrar los resultados
         mostrarResultados(jsonOutput, textoHTML);
     }
 
