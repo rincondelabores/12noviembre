@@ -1,3 +1,35 @@
+// --- BASE DE DATOS DE TALLAS ---
+// Medidas corporales estándar en CM. La holgura se añade después.
+const SIZING_DATABASE = {
+    // Bebés
+    "primera-puesta": { display: "Primera Puesta", pecho: 40, cuello: 25.0, sisa: 10.0, manga: 15, cuerpo: 16, muneca: 9.0 },
+    "1-3m": { display: "1–3 Meses", pecho: 42, cuello: 25.5, sisa: 10.5, manga: 17, cuerpo: 17, muneca: 10.0 },
+    "3-6m": { display: "3–6 Meses", pecho: 44, cuello: 26.0, sisa: 11.5, manga: 19, cuerpo: 19, muneca: 11.0 },
+    "6-9m": { display: "6–9 Meses", pecho: 46, cuello: 26.5, sisa: 12.0, manga: 21, cuerpo: 21, muneca: 11.5 },
+    "9-12m": { display: "9–12 Meses", pecho: 48, cuello: 27.0, sisa: 12.5, manga: 23, cuerpo: 22, muneca: 12.0 },
+    "12-15m": { display: "12–15 Meses", pecho: 50, cuello: 27.5, sisa: 13.0, manga: 25, cuerpo: 23, muneca: 12.5 },
+    "15-18m": { display: "15–18 Meses", pecho: 51, cuello: 27.8, sisa: 13.5, manga: 26, cuerpo: 23, muneca: 13.0 },
+    "18-24m": { display: "18–24 Meses", pecho: 53, cuello: 28.0, sisa: 14.5, manga: 28, cuerpo: 24, muneca: 13.5 },
+    
+    // Infantiles
+    "3-4a": { display: "3–4 Años", pecho: 58, cuello: 29.0, sisa: 15.0, manga: 30, cuerpo: 26, muneca: 14.0 },
+    "5-6a": { display: "5–6 Años", pecho: 64, cuello: 30.0, sisa: 16.0, manga: 34, cuerpo: 28, muneca: 14.5 },
+    "7-8a": { display: "7–8 Años", pecho: 70, cuello: 31.0, sisa: 17.0, manga: 38, cuerpo: 30, muneca: 15.0 },
+    "9-10a": { display: "9–10 Años", pecho: 76, cuello: 32.0, sisa: 18.0, manga: 42, cuerpo: 32, muneca: 15.5 },
+
+    // Adultos (Las claves 36, 38, etc. deben coincidir con el 'value' del HTML)
+    "36": { display: "EU 36", pecho: 84, cuello: 34.7, sisa: 17.2, manga: 43, cuerpo: 38, muneca: 16.5 },
+    "38": { display: "EU 38", pecho: 88, cuello: 35.8, sisa: 17.6, manga: 43, cuerpo: 38, muneca: 17.0 },
+    "40": { display: "EU 40", pecho: 92, cuello: 36.9, sisa: 18.0, manga: 44, cuerpo: 39, muneca: 17.0 },
+    "42": { display: "EU 42", pecho: 96, cuello: 38.0, sisa: 18.4, manga: 44, cuerpo: 39, muneca: 17.5 },
+    "44": { display: "EU 44", pecho: 100, cuello: 39.1, sisa: 18.8, manga: 45, cuerpo: 40, muneca: 17.5 },
+    "46": { display: "EU 46", pecho: 106, cuello: 40.2, sisa: 19.2, manga: 45, cuerpo: 40, muneca: 18.0 },
+    "48": { display: "EU 48", pecho: 112, cuello: 41.3, sisa: 19.6, manga: 46, cuerpo: 41, muneca: 18.0 },
+    "50": { display: "EU 50", pecho: 118, cuello: 42.4, sisa: 20.0, manga: 46, cuerpo: 41, muneca: 18.5 }
+};
+// --- FIN DE LA BASE DE DATOS ---
+
+
 // Espera a que todo el HTML esté cargado
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -84,90 +116,126 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Función principal que genera el patrón.
-     * ESTA ES LA FUNCIÓN MÁS IMPORTANTE A DESARROLLAR.
-     * Por ahora, solo simula el CASO DE PRUEBA 1.
      */
     function generarPatron(data) {
+        
+        // --- A. RECOGER DATOS DE ENTRADA ---
         const pts10 = parseFloat(data.pts10);
         const rows10 = parseFloat(data.rows10);
-        const talla = data.talla;
+        const tallaId = data.talla; // p.ej. "primera-puesta", "3-6m", "38"
         const metodo = data.metodo;
 
-        // ---- INICIO DE LÓGICA DE CÁLCULO ----
-        // Esta es la implementación del Caso de Prueba 1
+        // --- B. COMPROBACIONES Y LÓGICA DE MVP ---
         
-        // Solo calculamos si son los datos exactos del test case 1
-        if (talla === 'primera-puesta' && pts10 === 22 && rows10 === 30 && metodo === 'top-down') {
-            
-            // 1. Variables intermedias
-            const pts_cm = pts10 / 10; // 2.2
-            const rows_cm = rows10 / 10; // 3.0
-            
-            // 2. Circunferencia objetivo (Datos estándar para 'primera-puesta')
-            const talla_cm = 42.0;
-            const ease_cm = 5.0; // Para ajuste 'normal'
-            const circ_obj_cm = talla_cm + ease_cm; // 47.0 cm
-            
-            // 3. Puntos totales
-            const total_sts_teorico = circ_obj_cm * pts_cm; // 47.0 * 2.2 = 103.4
-            
-            // 4. Lógica de Raglán (Simplificada para este MVP)
-            // Se asume un montaje de cuello de 54p y 6 rondas de aumento
-            const neck_cast_on = 54; 
-            const aumentos_rondas = 6;
-            const puntos_aumentados = aumentos_rondas * 8; // 8p por ronda de raglán
-            const total_sts_ajustado = neck_cast_on + puntos_aumentados; // 54 + 48 = 102 puntos
-            const circ_final_cm = total_sts_ajustado / pts_cm; // 102 / 2.2 = 46.36 cm
-            
-            // 5. Cálculos de largo
-            const largo_cuerpo_cm = 14;
-            const largo_manga_cm = 15;
-            const pasadas_cuerpo = Math.round(largo_cuerpo_cm * rows_cm); // 14 * 3 = 42
-            const pasadas_manga = Math.round(largo_manga_cm * rows_cm); // 15 * 3 = 45
-
-            // 6. Generar el JSON de salida
-            const jsonOutput = {
-              "resumen": "Montar 54 puntos para el cuello. Tejer 12 pasadas (aprox 4 cm) en elástico 1x1. Continuar 12 pasadas (6 rondas de aumento) en punto jersey, realizando aumentos de raglán cada 2 pasadas hasta alcanzar 102 puntos. Separar 21 puntos para cada manga y continuar el cuerpo (64 puntos) recto durante 42 pasadas (aprox 14 cm).",
-              "parametros": {
-                "pts10": pts10,
-                "rows10": rows10,
-                "pts_cm": pts_cm,
-                "rows_cm": rows_cm,
-                "circ_obj_cm": circ_obj_cm,
-                "total_sts": total_sts_teorico,
-                "total_sts_ajustado": total_sts_ajustado
-              },
-              "instrucciones": [
-                "1. Montaje del cuello: Montar 54 puntos. Une en redondo (si es jersey) o empieza a tejer plano (si es chaqueta).",
-                "2. Elástico: Tejer 12 pasadas (aprox 4 cm) en elástico 1x1 (1 punto derecho, 1 punto revés).",
-                "3. Preparación Raglán (Pasada de Marcadores): Tejer 8p (Delantero), PM, 1p (Raglán), PM, 9p (Manga), PM, 1p (Raglán), PM, 16p (Espalda), PM, 1p (Raglán), PM, 9p (Manga), PM, 1p (Raglán), PM, 8p (Delantero). (Total = 54p).",
-                "4. Inicio Aumentos Raglán (Pasada 1 - Derecho): Tejer hasta 1p antes del marcador, Aumentar 1p (M1L), tejer 1p (raglán), Aumentar 1p (M1R). Repetir 4 veces. (Total = 62p).",
-                "5. Pasada 2 (Revés): Tejer todos los puntos del revés (sin aumentos).",
-                "6. Calendario de Aumentos (Pasadas 3-12): Repetir los pasos 4 y 5, 5 veces más (Total 6 rondas de aumento).",
-                "7. Resultado Tras Aumentos (Total 102 puntos): Delantero(14p), Manga(21p), Espalda(28p), Manga(21p), Delantero(14p). (Puntos de raglán se unen a las secciones).",
-                "8. Separación de Mangas: Tejer 14p (Delantero), poner 21p (Manga 1) en espera, montar 4p nuevos (sisa), tejer 28p (Espalda), poner 21p (Manga 2) en espera, montar 4p nuevos (sisa), tejer 14p (Delantero).",
-                "9. Cuerpo: Continuar tejiendo los puntos del cuerpo (14+4+28+4+14 = 64 puntos) durante 42 pasadas (aprox 14 cm).",
-                "10. Bajo: Tejer 10 pasadas en elástico 1x1. Cerrar todos los puntos.",
-                "11. Mangas (Repetir 2 veces): Recoger 21p en espera + 4p de la sisa. (Total 25 puntos). Tejer 45 pasadas (aprox 15 cm).",
-                "12. Puños: Tejer 8 pasadas en elástico 1x1. Cerrar."
-              ],
-              "advertencias": ["Advertencia (Redondeo): El contorno objetivo (47.0 cm) se ajustó a 46.36 cm (102 puntos) para que los aumentos de raglán sean consistentes."]
-            };
-
-            // 7. Generar el texto HTML
-            const textoHTML = `
-                <ol>
-                    ${jsonOutput.instrucciones.map(paso => `<li>${paso}</li>`).join('')}
-                </ol>
-            `;
-            
-            // 8. Mostrar los resultados
-            mostrarResultados(jsonOutput, textoHTML);
-
-        } else {
-            // Caso para cualquier otra combinación de entradas (no implementada aún)
-            mostrarError("Lo sentimos, la lógica de cálculo para esta combinación específica de talla, muestra y método aún no está implementada en este MVP. Solo el caso de prueba 'Primera Puesta' (22p/30r) está activo.");
+        // 1. Buscar la talla en la base de datos
+        const tallaData = SIZING_DATABASE[tallaId];
+        
+        if (!tallaData) {
+            mostrarError("La talla seleccionada no se encontró en la base de datos.");
+            return;
         }
+
+        // 2. Por ahora, solo funciona el método Top-Down
+        if (metodo !== 'top-down') {
+            mostrarError("Lo sentimos, la lógica de cálculo para el método 'Bottom-Up' aún no está implementada en este MVP. Por favor, selecciona 'Top-Down (Raglán)'.");
+            return;
+        }
+
+        // --- C. CÁLCULOS (Lógica Top-Down) ---
+        
+        // 1. Variables intermedias
+        const pts_cm = pts10 / 10;
+        const rows_cm = rows10 / 10;
+        
+        // 2. Circunferencia objetivo (¡Ahora usa la base de datos!)
+        const talla_cm = tallaData.pecho;
+        
+        // TODO: Leer la holgura desde el input 'data.ajuste'
+        // Por ahora, usamos 5cm fijos (ajuste "normal" para bebé)
+        const ease_cm = 5.0; 
+        const circ_obj_cm = talla_cm + ease_cm;
+        
+        // 3. Puntos totales
+        const total_sts_teorico = circ_obj_cm * pts_cm;
+
+        // 4. Lógica de Raglán (Simplificada para este MVP)
+        // Usamos el cuello y la sisa de la base de datos
+        const neck_cm = tallaData.cuello;
+        const neck_cast_on_teorico = neck_cm * pts_cm;
+        
+        // --- Lógica de redondeo y ajuste (MUY simplificada) ---
+        // Ajustamos el montaje a un múltiplo de 2
+        const neck_cast_on = Math.round(neck_cast_on_teorico / 2) * 2;
+        
+        // Calculamos los aumentos necesarios
+        const sisa_pasadas = Math.round(tallaData.sisa * rows_cm);
+        // Si tejemos plano, 1 pasada de aumento cada 2 pasadas (solo pasadas del derecho)
+        const aumentos_rondas = Math.floor(sisa_pasadas / 2);
+        
+        const puntos_aumentados = aumentos_rondas * 8; // 8p por ronda de raglán
+        const total_sts_ajustado = neck_cast_on + puntos_aumentados;
+        
+        
+        // 5. Cálculos de largo (¡Ahora usa la base de datos!)
+        const largo_cuerpo_cm = tallaData.cuerpo;
+        const largo_manga_cm = tallaData.manga;
+        const pasadas_cuerpo = Math.round(largo_cuerpo_cm * rows_cm);
+        const pasadas_manga = Math.round(largo_manga_cm * rows_cm);
+        
+        // 6. Distribución (Simplificada)
+        // Esto es un ejemplo, la lógica de distribución real es más compleja
+        const puntos_manga_aprox = Math.round((total_sts_ajustado * 0.2) / 2) * 2; // 20% para cada manga
+        const puntos_cuerpo_restantes = total_sts_ajustado - (puntos_manga_aprox * 2);
+        const puntos_espalda = Math.round((puntos_cuerpo_restantes / 2) / 2) * 2;
+        const puntos_delantero = puntos_cuerpo_restantes - puntos_espalda;
+        const puntos_sisa_montar = Math.round(pts_cm * 2); // Montar 2cm en sisa
+        const puntos_cuerpo_total = puntos_delantero + puntos_espalda + (puntos_sisa_montar * 2);
+
+        // --- D. GENERAR SALIDA ---
+        
+        // 7. Generar el JSON de salida
+        const jsonOutput = {
+          "resumen": `Montar ${neck_cast_on} puntos para el cuello (Talla: ${tallaData.display}). Realizar ${aumentos_rondas} rondas de aumento de raglán (aprox ${tallaData.sisa} cm) hasta alcanzar ${total_sts_ajustado} puntos. Separar ${puntos_manga_aprox} puntos para cada manga. Continuar el cuerpo (${puntos_cuerpo_total} puntos) recto durante ${pasadas_cuerpo} pasadas (aprox ${largo_cuerpo_cm} cm).`,
+          "parametros": {
+            "pts10": pts10,
+            "rows10": rows10,
+            "pts_cm": pts_cm,
+            "rows_cm": rows_cm,
+            "talla_seleccionada": tallaId,
+            "talla_pecho_base_cm": talla_cm,
+            "ease_cm": ease_cm,
+            "circ_obj_cm": circ_obj_cm,
+            "total_sts_teorico": total_sts_teorico,
+            "total_sts_ajustado": total_sts_ajustado,
+            "neck_cast_on": neck_cast_on,
+            "pasadas_sisa": sisa_pasadas,
+            "pasadas_cuerpo": pasadas_cuerpo,
+            "pasadas_manga": pasadas_manga
+          },
+          "instrucciones": [
+            `1. Montaje del cuello (Talla ${tallaData.display}): Montar ${neck_cast_on} puntos.`,
+            `2. Elástico: Tejer elástico (1x1 o 2x2) durante aprox 2-3 cm.`,
+            `3. Preparación Raglán: Distribuir puntos y colocar 4 marcadores de raglán (la lógica de distribución exacta debe implementarse).`,
+            `4. Aumentos Raglán: Tejer ${sisa_pasadas} pasadas (aprox ${tallaData.sisa} cm), realizando aumentos de raglán cada 2 pasadas (${aumentos_rondas} rondas de aumento).`,
+            `5. Resultado Tras Aumentos: Total ${total_sts_ajustado} puntos.`,
+            `6. Separación de Mangas: Poner ${puntos_manga_aprox} puntos de cada manga en espera. Montar ${puntos_sisa_montar} puntos nuevos para la sisa.`,
+            `7. Cuerpo: Continuar tejiendo los ${puntos_cuerpo_total} puntos del cuerpo durante ${pasadas_cuerpo} pasadas (aprox ${largo_cuerpo_cm} cm).`,
+            `8. Bajo: Tejer elástico y cerrar puntos.`,
+            `9. Mangas: Recoger ${puntos_manga_aprox} puntos en espera + ${puntos_sisa_montar} puntos de la sisa. Tejer recto durante ${pasadas_manga} pasadas (aprox ${largo_manga_cm} cm), disminuir para puño y cerrar.`
+          ],
+          "advertencias": ["Resultados basados en lógica MVP (Top-Down). La distribución de puntos de raglán y las disminuciones de puño son aproximadas y deben detallarse."]
+        };
+
+        // 8. Generar el texto HTML
+        const textoHTML = `
+            <ol>
+                ${jsonOutput.instrucciones.map(paso => `<li>${paso}</li>`).join('')}
+            </ol>
+            <div class="alert-critical">${jsonOutput.advertencias[0]}</div>
+        `;
+        
+        // 9. Mostrar los resultados
+        mostrarResultados(jsonOutput, textoHTML);
     }
 
     /**
