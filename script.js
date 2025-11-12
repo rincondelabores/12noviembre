@@ -31,7 +31,7 @@ const SIZING_DATABASE = {
 
 /**
  * Distribuye los puntos iniciales del escote según la regla 1/3, 1/3, 1/3
- * y ajusta los puntos sobrantes según la prioridad.
+ * y ajusta los puntos sobrantes según la prioridad. (VERSIÓN CORREGIDA)
  */
 function distribuirRagland(totalPuntos, esChaqueta) {
     
@@ -40,8 +40,8 @@ function distribuirRagland(totalPuntos, esChaqueta) {
     let puntosRaglan = 4; // Los 4 puntos de las líneas de raglán (1p en cada línea)
     
     // Validar que hay suficientes puntos
-    if (totalPuntos <= puntosRaglan) {
-        throw new Error("Puntos de montaje insuficientes para crear las 4 líneas de raglán. Revisa la muestra o el cuello.");
+    if (totalPuntos <= (puntosRaglan + 3)) { // Necesita al menos 1p por sección + raglán
+        throw new Error(`Puntos de montaje insuficientes (${totalPuntos}p). Se necesita un mínimo de 8p para repartir. Revisa la muestra o el cuello.`);
     }
     
     let puntosARepartir = totalPuntos - puntosRaglan;
@@ -55,15 +55,10 @@ function distribuirRagland(totalPuntos, esChaqueta) {
     puntosDelantero = parte; // Total para el/los delanteros
     puntosManga = parte;     // Total para las dos mangas
 
-    // 3. Gestión del Sobrante
-    // Prioridad 1: Delanteros
-    // Prioridad 2: Espalda
-    // Prioridad 3: Mangas
+    // 3. Gestión del Sobrante (Tu regla: 1 para espalda, si hay 2, 1 del y 1 esp)
     if (sobrante === 1) {
-        // Si sobra 1, se da a la Espalda (según tu regla)
         puntosEspalda += 1;
     } else if (sobrante === 2) {
-        // Si sobran 2, damos 1 a Delantero y 1 a Espalda (priorizando delanteros)
         puntosDelantero += 1;
         puntosEspalda += 1;
     }
@@ -77,7 +72,7 @@ function distribuirRagland(totalPuntos, esChaqueta) {
             puntosDelantero += 1;
             puntosEspalda -= 1; 
         }
-        puntosDelantero /= 2; // Repartir el delantero en dos (Delantero Izq y Der)
+        puntosDelantero = Math.floor(puntosDelantero / 2); // Repartir el delantero en dos (Delantero Izq y Der)
     }
     
     // 4.2. Mangas (El total de mangas debe ser par para dividir en dos)
@@ -85,12 +80,17 @@ function distribuirRagland(totalPuntos, esChaqueta) {
         puntosManga -= 1; // Quitar 1 punto de la manga total
         puntosEspalda += 1; // Dárselo a la espalda (según tu regla)
     }
-    puntosManga /= 2; // Repartir la manga total en dos (Manga 1 y Manga 2)
+    puntosManga = Math.floor(puntosManga / 2); // Repartir la manga total en dos (Manga 1 y Manga 2)
 
     // 5. Devolver Resultado
     let chequeo = (esChaqueta ? (puntosDelantero * 2) : puntosDelantero) + puntosEspalda + (puntosManga * 2) + 4;
+    
     if (chequeo !== totalPuntos) {
-         console.warn("Error de lógica en el reparto de raglán. Total no coincide.");
+         console.warn(`Error de lógica en el reparto de raglán. Total no coincide. ${chequeo} !== ${totalPuntos}`);
+         // Ajuste final por si el redondeo quitó puntos
+         let diferencia = totalPuntos - chequeo;
+         puntosEspalda += diferencia; // El ajuste final siempre a la espalda
+         chequeo = (esChaqueta ? (puntosDelantero * 2) : puntosDelantero) + puntosEspalda + (puntosManga * 2) + 4;
     }
     
     return {
@@ -178,9 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', (e) => {
         e.preventDefault(); 
         
-        // **** CORRECCIÓN: Añadido TRY...CATCH ****
-        // Esto garantiza que si 'generarPatron' falla,
-        // se mostrará el error en lugar de congelar la app.
+        // **** Bloque TRY...CATCH para capturar errores ****
         try {
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
@@ -190,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mostrarError(`Error crítico en el cálculo: ${error.message}`);
         }
         
-        // Esto ahora se ejecutará incluso si 'generarPatron' falla
+        // Muestra el paso 4, ya sea con resultados o con el error
         showStep(4);
     });
 
@@ -211,7 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const tallaData = SIZING_DATABASE[tallaId];
         
         if (!tallaData) {
-            // Esta era la causa probable del error
             throw new Error(`La talla seleccionada ('${tallaId}') no se encontró en la base de datos.`);
         }
 
@@ -242,39 +239,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Aumentos necesarios
         const sisa_pasadas = Math.round(tallaData.sisa * rows_cm);
-        const aumentos_rondas = Math.floor(sisa_pasadas / 2);
-        const puntos_aumentados = aumentos_rondas * 8; 
-        const total_sts_final_yoke = reparto.puntosTotalesChequeo + puntos_aumentados;
+        const aumentos_rondas = Math.floor(sisa_pasadas / 2); // 1 ronda de aumento cada 2 pasadas
         
         // Puntos finales tras aumentos de raglán
-        const sts_delantero_final = reparto.delantero + aumentos_rondas;
-        const sts_espalda_final = reparto.espalda + (aumentos_rondas * 2);
-        const sts_manga_final = reparto.manga + (aumentos_rondas * 2);
-        
-        // Corrección: El delantero (si es jersey) o los dos delanteros (chaqueta) reciben 2 aumentos en total.
-        // La espalda recibe 2 aumentos. Las mangas reciben 2 aumentos CADA UNA.
-        // Total = 2 (Del) + 2 (Esp) + 2 (M1) + 2 (M2) = 8.
-        // PERO... si es chaqueta, cada delantero solo tiene 1 línea de aumento.
-        // Y si es jersey, el delantero (una sola pieza) tiene 2 líneas de aumento.
-        
-        // Recalculemos los puntos finales:
-        // Si es chaqueta, reparto.delantero es 1/2.
-        const sts_delantero_final_calculado = reparto.delantero + aumentos_rondas; // (Chaqueta: 1 aumento por ronda. Jersey: 2 aumentos por ronda)
-        
-        // CORRECCIÓN LÓGICA IMPORTANTE:
         let sts_delantero_final_real = 0;
         if (esChaqueta) {
-             sts_delantero_final_real = reparto.delantero + aumentos_rondas; // Cada delantero recibe 1 aumento por ronda
+             sts_delantero_final_real = reparto.delantero + aumentos_rondas; // Cada delantero (son 2) recibe 1 aumento por ronda
         } else {
              sts_delantero_final_real = reparto.delantero + (aumentos_rondas * 2); // El delantero único recibe 2
         }
 
         const sts_espalda_final_real = reparto.espalda + (aumentos_rondas * 2);
         const sts_manga_final_real = reparto.manga + (aumentos_rondas * 2);
+        
+        const total_sts_final_yoke = (esChaqueta ? (sts_delantero_final_real * 2) : sts_delantero_final_real) + sts_espalda_final_real + (sts_manga_final_real * 2) + 4; // +4 por los puntos de raglán
 
         // Puntos Cuerpo y Manga
-        const puntos_sisa_montar = Math.round(pts_cm * 2); // Montar 2cm en sisa
+        const puntos_sisa_montar = Math.round(pts_cm * 2); // Montar 2cm en sisa (aprox)
         const puntos_cuerpo_total = (esChaqueta ? (sts_delantero_final_real * 2) : sts_delantero_final_real) + sts_espalda_final_real + (puntos_sisa_montar * 2);
+        const puntos_manga_total = sts_manga_final_real + puntos_sisa_montar;
 
         // Cálculos de largo
         const largo_cuerpo_cm = tallaData.cuerpo;
@@ -307,20 +290,34 @@ document.addEventListener('DOMContentLoaded', () => {
             `3. **Distribución de Puntos (Pasada de preparación):** Colocar marcadores. ${esChaqueta ? `Tejer ${reparto.delantero}p (Delantero Der), PM, 1p (Raglán), PM, ${reparto.manga}p (Manga 1), PM, 1p (Raglán), PM, ${reparto.espalda}p (Espalda), PM, 1p (Raglán), PM, ${reparto.manga}p (Manga 2), PM, 1p (Raglán), PM, ${reparto.delantero}p (Delantero Izq).` : `Tejer ${reparto.delantero}p (Delantero), PM, 1p (Raglán), PM, ${reparto.manga}p (Manga 1), PM, 1p (Raglán), PM, ${reparto.espalda}p (Espalda), PM, 1p (Raglán), PM, ${reparto.manga}p (Manga 2), PM, 1p (Raglán).`}`,
             `4. **Aumentos Raglán:** Tejer en plano (agujas rectas) durante ${sisa_pasadas} pasadas, realizando **${aumentos_rondas} rondas de aumento** (cada 2 pasadas) a ambos lados de las 4 líneas de raglán.`,
             `5. **Separación de Mangas:** Al finalizar los aumentos, los puntos serán: ${etiquetaDelanteroFinal}, Espalda (${sts_espalda_final_real}p), Mangas (${sts_manga_final_real}p c/u). Poner los ${sts_manga_final_real}p de cada manga en espera. Montar ${puntos_sisa_montar}p bajo cada sisa para el cuerpo.`,
-            `6. **Tejer Mangas (Primero):** Retomar los ${sts_manga_final_real}p de una manga (más los ${puntos_sisa_montar}p de la sisa). Tejer en plano con agujas rectas por ${pasadas_manga} pasadas. Cerrar y tejer la segunda manga.`,
-            `7. **Tejer Cuerpo (Segundo):** Retomar los ${puntos_cuerpo_total}p restantes del cuerpo. Tejer en plano con agujas rectas por ${pasadas_cuerpo} pasadas.`,
+            `6. **Tejer Mangas (Primero):** Retomar los ${sts_manga_final_real}p de una manga y recoger los ${puntos_sisa_montar}p montados en la sisa (Total ${puntos_manga_total}p). Tejer en plano con agujas rectas por ${pasadas_manga} pasadas. Cerrar y tejer la segunda manga.`,
+            `7. **Tejer Cuerpo (Segundo):** Retomar los ${ (esChaqueta ? (sts_delantero_final_real * 2) : sts_delantero_final_real) + sts_espalda_final_real} puntos del cuerpo y recoger los ${puntos_sisa_montar * 2} puntos de ambas sisas (Total ${puntos_cuerpo_total}p). Tejer en plano con agujas rectas por ${pasadas_cuerpo} pasadas.`,
             `8. **Bajo:** Tejer elástico y cerrar todos los puntos.`
           ],
           "advertencias": ["El cálculo del reparto inicial utiliza la regla 1/3, 1/3, 1/3 con tus ajustes de redondeo. El tejido es plano con agujas rectas."]
         };
+        
+        // **** INICIO DEL CÓDIGO CORREGIDO (ESTO FALTABA) ****
+        // Generar el texto HTML a partir del JSON
+        const textoHTML = `
+            <ol>
+                ${jsonOutput.instrucciones.map(paso => `<li>${paso.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('')}
+            </ol>
+            <div class="alert-critical">${jsonOutput.advertencias[0]}</div>
+        `;
+        // **** FIN DEL CÓDIGO CORREGIDO ****
 
-        // Mostrar los resultados
+        // Esta es la línea 318 (aprox) que daba el error. Ahora "textoHTML" SÍ existe.
         mostrarResultados(jsonOutput, textoHTML);
     }
 
     // --- FUNCIONES DE VISUALIZACIÓN (Muestran los resultados o el error) ---
 
     function mostrarResultados(json, textoHTML) {
+        // Limpiamos por si había un error previo
+        document.getElementById('instrucciones-texto').classList.remove('alert-critical');
+        
+        // Usamos innerHTML para el resumen para que pille las negritas
         document.getElementById('resumen-texto').innerHTML = json.resumen.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         document.getElementById('json-output').textContent = JSON.stringify(json, null, 2); 
         document.getElementById('instrucciones-texto').innerHTML = textoHTML;
@@ -329,6 +326,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function mostrarError(mensaje) {
         document.getElementById('resumen-texto').textContent = "Error en el cálculo";
         document.getElementById('json-output').textContent = `{ "error": "${mensaje}" }`;
-        document.getElementById('instrucciones-texto').innerHTML = `<p class="alert-critical">${mensaje}</p>`;
+        // Mostramos el error en la caja de instrucciones para que sea bien visible
+        const errorBox = document.getElementById('instrucciones-texto');
+        errorBox.innerHTML = `<p>${mensaje}</p>`;
+        errorBox.classList.add('alert-critical'); // Usamos la clase de error que ya definimos
     }
 });
