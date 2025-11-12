@@ -1,0 +1,235 @@
+/* --- Paleta de Colores (Basada en los mockups) --- */
+:root {
+    --color-principal: #3E8A85; /* Teal */
+    --color-fondo: #FDFBF5; /* Crema */
+    --color-acento: #E87A5E; /* Naranja/Coral */
+    --color-texto: #333;
+    --color-texto-claro: #555;
+    --color-borde: #DDD;
+}
+
+/* --- Tipografía (Incluyendo la manuscrita) --- */
+body {
+    font-family: 'Work Sans', sans-serif;
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+}
+
+h1, h2 {
+    /* Tipografía manuscrita que te gusta para los títulos */
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    color: var(--color-principal);
+}
+
+h1 {
+    font-size: 2.5rem;
+    text-align: center;
+    margin: 0;
+}
+
+h2 {
+    font-size: 2rem;
+    border-bottom: 2px solid var(--color-acento);
+    padding-bottom: 5px;
+}
+
+header p {
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--color-texto-claro);
+    margin-top: -5px;
+}
+
+/* --- Contenedor Principal --- */
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 20px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+/* --- Barra de Progreso --- */
+.progress-bar {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+.step-indicator {
+    padding: 5px 10px;
+    color: var(--color-borde);
+    border-bottom: 3px solid var(--color-borde);
+    font-size: 0.9rem;
+}
+.step-indicator.active {
+    color: var(--color-principal);
+    border-bottom-color: var(--color-principal);
+    font-weight: 600;
+}
+
+/* --- Lógica de Pasos (Ocultar/Mostrar) --- */
+.step {
+    display: none;
+}
+.step.active {
+    display: block;
+    animation: fadeIn 0.5s ease-in-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Grupos de Formulario --- */
+.form-group {
+    margin-bottom: 25px;
+}
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--color-texto);
+}
+.form-group small {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--color-texto-claro);
+    margin-top: 5px;
+}
+
+/* --- Entradas (Inputs) --- */
+input[type="text"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--color-borde);
+    border-radius: 5px;
+    box-sizing: border-box; /* Importante para que el padding no afecte el ancho */
+    font-size: 1rem;
+}
+input:focus, select:focus {
+    border-color: var(--color-principal);
+    outline: none;
+    box-shadow: 0 0 5px rgba(62, 138, 133, 0.3);
+}
+
+/* --- Selectores Toggle (Botones Radio) --- */
+.toggle-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.toggle-group input[type="radio"] {
+    display: none; /* Ocultamos el radio button real */
+}
+.toggle-group label {
+    padding: 10px 15px;
+    border: 1px solid var(--color-borde);
+    border-radius: 50px; /* Estilo píldora */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 400;
+    margin-bottom: 0;
+}
+.toggle-group input[type="radio"]:checked + label {
+    background-color: var(--color-principal);
+    color: #fff;
+    border-color: var(--color-principal);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* --- Botones de Navegación --- */
+.nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+button.btn-next, button.btn-submit {
+    background-color: var(--color-acento);
+    color: #fff;
+}
+button.btn-next:hover, button.btn-submit:hover {
+    opacity: 0.85;
+}
+button.btn-prev, button.btn-start-over {
+    background-color: #f0f0f0;
+    color: var(--color-texto-claro);
+}
+button.btn-prev:hover, button.btn-start-over:hover {
+    background-color: #e0e0e0;
+}
+/* Hacer que el botón "Volver" no aparezca en el primer paso */
+#step-1 .btn-prev {
+    display: none;
+}
+#step-1 .nav-buttons {
+    justify-content: flex-end; /* Alinear el primer "Siguiente" a la derecha */
+}
+
+/* --- Alertas y Validación --- */
+.alert-critical {
+    background-color: #fff8f8;
+    border: 1px solid #e87a5e;
+    color: #c53030;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+.validation-msg {
+    color: #c53030 !important;
+    display: none; /* Oculto por defecto */
+}
+input:invalid {
+    border-color: #c53030;
+}
+
+/* --- Contenedor de Resultados --- */
+#resultado-container {
+    background: #fdfdfd;
+    padding: 20px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+}
+#resumen-container {
+    background: var(--color-fondo);
+    padding: 15px;
+    border-radius: 5px;
+}
+#json-container {
+    margin-top: 20px;
+}
+pre {
+    background: #282c34; /* Fondo oscuro para JSON */
+    color: #abb2bf;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto; /* Scroll horizontal si el JSON es largo */
+    font-size: 0.9rem;
+}
+#instrucciones-texto {
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+#instrucciones-texto ol {
+    padding-left: 20px;
+}
+#instrucciones-texto li {
+    margin-bottom: 15px;
+}
