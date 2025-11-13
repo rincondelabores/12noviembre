@@ -12,81 +12,46 @@
 <body>
 
     <div class="container">
+        
         <header>
             <h1>Calcula tus puntos con Rincón de Labores</h1>
             <p>Tu patrón, a tu medida, paso a paso</p>
-            <div class="progress-bar">
-                <div id="step-indicator-1" class="step-indicator active">Básico</div>
-                <div id="step-indicator-2" class="step-indicator">Muestra</div>
-                <div id="step-indicator-3" class="step-indicator">Medidas</div>
-                <div id="step-indicator-4" class="step-indicator">¡Listo!</div>
-            </div>
         </header>
 
         <form id="calc-form">
             
-            <div class="step active" id="step-1">
-                <h2>Paso 1: Información Básica</h2>
-                
-                <div class="form-group">
-                    <label for="nombre-proyecto">Nombre del Proyecto:</label>
-                    <input type="text" id="nombre-proyecto" name="nombre_proyecto" value="Mi primer jersey">
-                    <small>Un nombre que te ayude a identificar tu proyecto.</small>
+            <fieldset class="form-section">
+                <legend>1. Elige tu Prenda</legend>
+                <div class="toggle-group icon-group">
+                    <input type="radio" id="tipo-jersey" name="tipo_prenda" value="jersey" checked>
+                    <label for="tipo-jersey"><span>👕</span>Jersey</label>
+                    <input type="radio" id="tipo-chaqueta" name="tipo_prenda" value="chaqueta">
+                    <label for="tipo-chaqueta"><span>🧥</span>Chaqueta</label>
                 </div>
+            </fieldset>
 
-                <div class="form-group">
-                    <label>Tipo de Prenda:</label>
-                    <div class="toggle-group">
-                        <input type="radio" id="tipo-chaqueta" name="tipo_prenda" value="chaqueta">
-                        <label for="tipo-chaqueta">Chaqueta (Abierta)</label>
-                        <input type="radio" id="tipo-jersey" name="tipo_prenda" value="jersey" checked>
-                        <label for="tipo-jersey">Jersey (Cerrado)</label>
-                    </div>
+            <fieldset class="form-section">
+                <legend>2. Elige el Método</legend>
+                <div class="toggle-group">
+                    <input type="radio" id="metodo-topdown" name="metodo" value="top-down" checked>
+                    <label for="metodo-topdown">Top-Down (Raglán)</label>
+                    <input type="radio" id="metodo-bottomup" name="metodo" value="bottom-up">
+                    <label for="metodo-bottomup">Bottom-Up (Manga Caída)</label>
                 </div>
+            </fieldset>
 
-                <div class="form-group">
-                    <label>Método de Construcción:</label>
-                    <div class="toggle-group">
-                        <input type="radio" id="metodo-topdown" name="metodo" value="top-down" checked>
-                        <label for="metodo-topdown">Top-Down (Raglán)</label>
-                        <input type="radio" id="metodo-bottomup" name="metodo" value="bottom-up">
-                        <label for="metodo-bottomup">Bottom-Up (Manga Caída)</label>
-                    </div>
+            <fieldset class="form-section">
+                <legend>3. Tu Muestra (10x10 cm)</legend>
+                <div class="form-group-inline">
+                    <label for="pts10">Puntos:</label>
+                    <input type="number" id="pts10" name="pts10" step="0.1" value="22" placeholder="p.ej. 22">
+                    <label for="rows10">Pasadas:</label>
+                    <input type="number" id="rows10" name="rows10" step="0.1" value="30" placeholder="p.ej. 30">
                 </div>
+            </fieldset>
 
-                <div class="nav-buttons">
-                    <button type="button" class="btn-next">Siguiente Paso &rarr;</button>
-                </div>
-            </div>
-
-            <div class="step" id="step-2">
-                <h2>Paso 2: Tu Muestra (10x10 cm)</h2>
-                
-                <div class="form-group">
-                    <label for="pts10">Puntos por 10 cm:</label>
-                    <input type="number" id="pts10" name="pts10" step="0.1" value="22">
-                    <small class="validation-msg" id="pts-warning">Introduce un valor entre 4 y 50.</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="rows10">Pasadas por 10 cm:</label>
-                    <input type="number" id="rows10" name="rows10" step="0.1" value="30">
-                    <small class="validation-msg" id="rows-warning">Introduce un valor entre 4 y 50.</small>
-                </div>
-
-                <div class="alert-critical">
-                    &#9888; ¡Importante! Asegúrate de que tu muestra mide exactamente 10x10 cm.
-                </div>
-
-                <div class="nav-buttons">
-                    <button type="button" class="btn-prev">&larr; Volver</button>
-                    <button type="button" class="btn-next">Siguiente Paso &rarr;</button>
-                </div>
-            </div>
-
-            <div class="step" id="step-3">
-                <h2>Paso 3: Medidas y Ajustes</h2>
-
+            <fieldset class="form-section">
+                <legend>4. Talla y Ajuste</legend>
                 <div class="form-group">
                     <label for="talla">Talla:</label>
                     <select id="talla" name="talla">
@@ -118,63 +83,44 @@
                         </optgroup>
                     </select>
                 </div>
-
                 <div class="form-group">
-                    <label>Ajuste / Holgura (Ease):</label>
+                    <label>Holgura (Ease):</label>
                     <div class="toggle-group">
                         <input type="radio" id="ajuste-normal" name="ajuste" value="normal" checked>
-                        <label for="ajuste-normal">Normal (+5cm)</label>
+                        <label for="ajuste-normal">Normal</label>
                         <input type="radio" id="ajuste-ajustado" name="ajuste" value="ajustado">
-                        <label for="ajuste-ajustado">Ajustado (+2cm)</label>
+                        <label for="ajuste-ajustado">Ajustado</label>
                         <input type="radio" id="ajuste-holgado" name="ajuste" value="holgado">
-                        <label for="ajuste-holgado">Holgado (+10cm)</label>
+                        <label for="ajuste-holgado">Holgado</label>
                     </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="nivel-detalle">Nivel de Detalle:</label>
-                    <div class="toggle-group">
-                        <input type="radio" id="nivel-principiante" name="nivel" value="principiante" checked>
-                        <label for="nivel-principiante">Principiante</label>
-                        <input type="radio" id="nivel-tecnico" name="nivel" value="tecnico">
-                        <label for="nivel-tecnico">Técnico</label>
-                    </div>
-                </div>
+            </fieldset>
 
-                <div class="form-group">
-                    <input type="checkbox" id="export-pdf" name="export-pdf" checked>
-                    <label for="export-pdf">Exportar a PDF</label>
-                </div>
-
-                <div class="nav-buttons">
-                    <button type="button" class="btn-prev">&larr; Volver</button>
-                    <button type="submit" class="btn-submit">Calcular Patrón</button>
-                </div>
+            <div class="nav-buttons">
+                <button type="submit" class="btn-submit">¡Calcular mi Patrón!</button>
             </div>
         </form>
 
-        <div class="step" id="step-4">
+        <div id="resultado-container">
             <h2>¡Aquí tienes tu patrón!</h2>
             
-            <div id="resultado-container">
-                <div id="resumen-container">
-                    <h3>Resumen del Patrón</h3>
-                    <p id="resumen-texto"></p>
-                </div>
+            <div id="resumen-container">
+                <h3>Resumen del Patrón</h3>
+                <p id="resumen-texto"></p>
+            </div>
 
-                <div id="instrucciones-container">
-                    <h3>Instrucciones Paso a Paso</h3>
-                    <div id="instrucciones-texto"></div>
-                </div>
+            <div id="instrucciones-container">
+                <h3>Instrucciones Paso a Paso</h3>
+                <div id="instrucciones-texto"></div>
+            </div>
 
-                <div id="json-container">
-                    <h3>Datos de Cálculo (JSON)</h3>
-                    <pre id="json-output"></pre>
-                </div>
+            <div id="json-container">
+                <h3>Datos de Cálculo (JSON)</h3>
+                <pre id="json-output"></pre>
             </div>
 
             <div class="nav-buttons">
-                <button type="button" class="btn-start-over">Empezar de Nuevo</button>
+                <button type="button" id="btn-modificar">&larr; Modificar Datos</button>
             </div>
         </div>
     </div>
