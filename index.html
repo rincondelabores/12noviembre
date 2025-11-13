@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Work+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Work+Sans:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -15,13 +15,25 @@
         
         <header>
             <h1>Calcula tus puntos con Rincón de Labores</h1>
-            <p>Tu patrón, a tu medida, paso a paso</p>
+            <p>Tu patrón, a tu medida y sin líos</p>
         </header>
 
         <form id="calc-form">
             
             <fieldset class="form-section">
-                <legend>1. Elige tu Prenda</legend>
+                <legend>1. ¿Qué quieres calcular?</legend>
+                <div class="toggle-group">
+                    <input type="radio" id="metodo-topdown" name="metodo" value="top-down" checked>
+                    <label for="metodo-topdown">Tejido desde el escote</label>
+                    <input type="radio" id="metodo-bottomup" name="metodo" value="bottom-up">
+                    <label for="metodo-bottomup">Tejido desde el bajo</label>
+                    <input type="radio" id="metodo-calculadora" name="metodo" value="calculadora-rapida">
+                    <label for="metodo-calculadora">Calcular Puntos (Manta, Bufanda...)</label>
+                </div>
+            </fieldset>
+
+            <fieldset class="form-section" id="seccion-prenda">
+                <legend>2. Elige tu Prenda</legend>
                 <div class="toggle-group icon-group">
                     <input type="radio" id="tipo-jersey" name="tipo_prenda" value="jersey" checked>
                     <label for="tipo-jersey"><span>👕</span>Jersey</label>
@@ -31,29 +43,27 @@
             </fieldset>
 
             <fieldset class="form-section">
-                <legend>2. Elige el Método</legend>
-                <div class="toggle-group">
-                    <input type="radio" id="metodo-topdown" name="metodo" value="top-down" checked>
-                    <label for="metodo-topdown">Top-Down (Raglán)</label>
-                    <input type="radio" id="metodo-bottomup" name="metodo" value="bottom-up">
-                    <label for="metodo-bottomup">Bottom-Up (Manga Caída)</label>
-                </div>
-            </fieldset>
-
-            <fieldset class="form-section">
                 <legend>3. Tu Muestra (10x10 cm)</legend>
                 <div class="form-group-inline">
-                    <label for="pts10">Puntos:</label>
-                    <input type="number" id="pts10" name="pts10" step="0.1" value="22" placeholder="p.ej. 22">
-                    <label for="rows10">Pasadas:</label>
-                    <input type="number" id="rows10" name="rows10" step="0.1" value="30" placeholder="p.ej. 30">
+                    <label for="pts10">Puntos (en 10cm):</label>
+                    <input type="number" id="pts10" name="pts10" step="0.1" value="22" placeholder="p.ej. 22" required>
+                    <label for="rows10">Pasadas (en 10cm):</label>
+                    <input type="number" id="rows10" name="rows10" step="0.1" placeholder="(Opcional)">
                 </div>
             </fieldset>
 
-            <fieldset class="form-section">
+            <fieldset class="form-section" id="calculadora-rapida-group">
+                <legend>Calcular Puntos</legend>
+                <div class="form-group-inline">
+                    <label for="cm_a_tejer">Centímetros a tejer (cm):</label>
+                    <input type="number" id="cm_a_tejer" name="cm_a_tejer" step="0.1" placeholder="p.ej. 80">
+                </div>
+            </fieldset>
+
+            <fieldset class="form-section" id="seccion-talla">
                 <legend>4. Talla y Ajuste</legend>
                 <div class="form-group">
-                    <label for="talla">Talla:</label>
+                    <label for="talla">Elige la talla:</label>
                     <select id="talla" name="talla">
                         <optgroup label="Bebés">
                             <option value="primera-puesta">Primera puesta</option>
@@ -82,30 +92,31 @@
                             <option value="50">EU 50</option>
                         </optgroup>
                     </select>
+                    <div id="talla-info-box"></div>
                 </div>
                 <div class="form-group">
-                    <label>Holgura (Ease):</label>
+                    <label>¿Cómo de holgado lo quieres?</label>
                     <div class="toggle-group">
-                        <input type="radio" id="ajuste-normal" name="ajuste" value="normal" checked>
-                        <label for="ajuste-normal">Normal</label>
                         <input type="radio" id="ajuste-ajustado" name="ajuste" value="ajustado">
-                        <label for="ajuste-ajustado">Ajustado</label>
+                        <label for="ajuste-ajustado">Ajustado (+2 cm)</label>
+                        <input type="radio" id="ajuste-normal" name="ajuste" value="normal" checked>
+                        <label for="ajuste-normal">Normal (+5 cm)</label>
                         <input type="radio" id="ajuste-holgado" name="ajuste" value="holgado">
-                        <label for="ajuste-holgado">Holgado</label>
+                        <label for="ajuste-holgado">Holgado (+10 cm)</label>
                     </div>
                 </div>
             </fieldset>
 
             <div class="nav-buttons">
-                <button type="submit" class="btn-submit">¡Calcular mi Patrón!</button>
+                <button type="submit" class="btn-submit">¡Calcular!</button>
             </div>
         </form>
 
         <div id="resultado-container">
-            <h2>¡Aquí tienes tu patrón!</h2>
+            <h2>¡Tu patrón está listo!</h2>
             
             <div id="resumen-container">
-                <h3>Resumen del Patrón</h3>
+                <h3>Resumen Rápido</h3>
                 <p id="resumen-texto"></p>
             </div>
 
