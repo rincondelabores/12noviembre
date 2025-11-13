@@ -1,108 +1,94 @@
-/* --- Paleta de Colores (Basada en los mockups) --- */
+/* --- Paleta de Colores --- */
 :root {
-    --color-principal: #3E8A85; /* Teal */
-    --color-fondo: #FDFBF5; /* Crema */
-    --color-acento: #E87A5E; /* Naranja/Coral */
+    --color-principal: #3E8A85;
+    --color-fondo: #FDFBF5;
+    --color-acento: #E87A5E;
     --color-texto: #333;
     --color-texto-claro: #555;
     --color-borde: #DDD;
 }
 
-/* --- Tipografía (Incluyendo la manuscrita) --- */
+/* --- Base (Mobile-First) --- */
 body {
     font-family: 'Work Sans', sans-serif;
     background-color: var(--color-fondo);
     color: var(--color-texto);
     line-height: 1.6;
     margin: 0;
-    padding: 0; /* Sin padding en el body en móvil */
-}
-
-h1, h2 {
-    /* Tipografía manuscrita que te gusta para los títulos */
-    font-family: 'Caveat', cursive;
-    font-weight: 700;
-    color: var(--color-principal);
+    padding: 0; 
 }
 
 h1 {
-    font-size: 2.2rem; /* Ligeramente más pequeño para móvil */
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    color: var(--color-principal);
+    font-size: 2.2rem;
     text-align: center;
     margin: 0 0 5px 0;
 }
-
 h2 {
-    font-size: 1.8rem; /* Ligeramente más pequeño para móvil */
+    font-family: 'Caveat', cursive;
+    font-size: 2rem;
+    color: var(--color-principal);
     border-bottom: 2px solid var(--color-acento);
     padding-bottom: 5px;
 }
-
 header p {
     text-align: center;
     font-size: 1rem;
     color: var(--color-texto-claro);
-    margin-top: -5px;
+    margin: -5px 0 20px 0;
 }
 
-/* --- Contenedor Principal (MÓVIL PRIMERO) --- */
+/* --- Contenedor --- */
 .container {
     width: 100%;
     margin: 0 auto;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+/* --- Secciones del Formulario --- */
+.form-section {
     background: #fff;
-    padding: 20px 15px; /* Menos padding lateral en móvil */
-    box-sizing: border-box; /* Importante para que el padding no desborde */
-    box-shadow: none;
-    border-radius: 0;
-    min-height: 100vh; /* Ocupa al menos toda la altura de la pantalla */
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+.form-section legend {
+    font-family: 'Caveat', cursive;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-texto-claro);
+    padding: 0 10px;
 }
 
-/* --- Barra de Progreso --- */
-.progress-bar {
-    display: flex;
-    justify-content: space-between;
-    margin: 20px 0;
-}
-.step-indicator {
-    padding: 5px 10px;
-    color: var(--color-borde);
-    border-bottom: 3px solid var(--color-borde);
-    font-size: 0.8rem; /* Más pequeño en móvil */
-    text-align: center;
-}
-.step-indicator.active {
-    color: var(--color-principal);
-    border-bottom-color: var(--color-principal);
-    font-weight: 600;
-}
-
-/* --- Lógica de Pasos (Ocultar/Mostrar) --- */
-.step {
-    display: none;
-}
-.step.active {
-    display: block;
-    animation: fadeIn 0.5s ease-in-out;
-}
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* --- Grupos de Formulario --- */
 .form-group {
-    margin-bottom: 25px;
+    margin-bottom: 15px;
 }
-.form-group label {
+.form-group label,
+.form-group-inline label {
     display: block;
     font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
     color: var(--color-texto);
 }
-.form-group small {
-    display: block;
-    font-size: 0.85rem;
-    color: var(--color-texto-claro);
-    margin-top: 5px;
+
+/* Grupo Muestra (Puntos y Pasadas) */
+.form-group-inline {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    align-items: center;
+}
+.form-group-inline label {
+    margin-bottom: 0;
+    font-weight: 400;
+}
+.form-group-inline input {
+    text-align: center;
 }
 
 /* --- Entradas (Inputs) --- */
@@ -110,11 +96,11 @@ input[type="text"],
 input[type="number"],
 select {
     width: 100%;
-    padding: 14px; /* Ligeramente más alto para mejor tacto */
+    padding: 14px;
     border: 1px solid var(--color-borde);
     border-radius: 5px;
     box-sizing: border-box; 
-    font-size: 1rem; /* Mantiene 1rem para evitar zoom en iOS */
+    font-size: 1rem;
 }
 input:focus, select:focus {
     border-color: var(--color-principal);
@@ -122,7 +108,7 @@ input:focus, select:focus {
     box-shadow: 0 0 5px rgba(62, 138, 133, 0.3);
 }
 
-/* --- Selectores Toggle (Botones Radio) --- */
+/* --- Selectores Toggle (Radio) --- */
 .toggle-group {
     display: flex;
     flex-wrap: wrap;
@@ -132,13 +118,15 @@ input:focus, select:focus {
     display: none; 
 }
 .toggle-group label {
-    padding: 10px 15px;
+    flex: 1; /* Ocupa el espacio disponible */
+    min-width: 120px;
+    padding: 12px 15px;
     border: 1px solid var(--color-borde);
-    border-radius: 50px; 
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s ease;
-    font-weight: 400;
-    margin-bottom: 0;
+    font-weight: 600;
+    text-align: center;
 }
 .toggle-group input[type="radio"]:checked + label {
     background-color: var(--color-principal);
@@ -147,95 +135,65 @@ input:focus, select:focus {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* --- Botones de Navegación (MÓVIL) --- */
+/* Iconos de Prenda */
+.icon-group label span {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 5px;
+}
+.icon-group label {
+    font-size: 1.1rem;
+    padding: 15px;
+}
+
+/* --- Botones de Navegación --- */
 .nav-buttons {
     display: flex;
-    justify-content: space-between;
-    margin-top: 30px;
-    border-top: 1px solid #eee;
-    padding-top: 20px;
-    gap: 10px; /* Espacio entre botones */
+    margin-top: 20px;
+    gap: 10px;
 }
 button {
-    padding: 14px 20px; /* Más altos para móvil */
+    padding: 14px 20px;
     border: none;
     border-radius: 5px;
-    font-size: 1rem;
+    font-size: 1.1rem; /* Más grande */
     cursor: pointer;
     font-weight: 600;
     transition: all 0.2s ease;
-    flex-grow: 1; /* Crecen para ocupar el espacio */
-    flex-basis: 0; /* Asegura que se repartan 50/50 */
-    text-align: center;
+    flex: 1; /* Ocupa todo el ancho */
 }
-button.btn-next, button.btn-submit {
+button.btn-submit {
     background-color: var(--color-acento);
     color: #fff;
+    font-family: 'Caveat', cursive;
+    font-size: 1.5rem;
 }
-button.btn-next:hover, button.btn-submit:hover {
+button.btn-submit:hover {
     opacity: 0.85;
 }
-button.btn-prev, button.btn-start-over {
+button#btn-modificar {
     background-color: #f0f0f0;
     color: var(--color-texto-claro);
 }
-button.btn-prev:hover, button.btn-start-over:hover {
-    background-color: #e0e0e0;
-}
-/* Hacer que el botón "Volver" no aparezca en el primer paso */
-#step-1 .btn-prev {
-    display: none;
-}
-#step-1 .nav-buttons {
-    justify-content: flex-end; 
-}
-/* Si solo hay un botón, que ocupe todo */
-#step-1 .nav-buttons .btn-next {
-    flex-grow: 1;
-}
 
-/* --- Alertas y Validación --- */
-.alert-critical {
-    background-color: #fff8f8;
-    border: 1px solid #e87a5e;
-    color: #c53030;
-    padding: 15px;
-    border-radius: 5px;
-    margin-top: 20px;
-}
-.validation-msg {
-    color: #c53030 !important;
-    display: none; /* Oculto por defecto */
-}
-input:invalid {
-    border-color: #c53030;
-}
-
-/* --- Contenedor de Resultados --- */
+/* --- Contenedor de Resultados (Oculto por defecto) --- */
 #resultado-container {
-    background: #fdfdfd;
-    padding: 15px; /* Menos padding en móvil */
-    border-radius: 5px;
-    border: 1px solid #eee;
+    display: none; /* Oculto hasta calcular */
 }
 #resumen-container {
     background: var(--color-fondo);
     padding: 15px;
-    border-radius: 5px;
+    border-radius: 8px;
+    margin-bottom: 20px;
 }
-#json-container {
-    margin-top: 20px;
-}
-pre {
-    background: #282c34; 
-    color: #abb2bf;
+#instrucciones-container {
+    background: #fff;
     padding: 15px;
-    border-radius: 5px;
-    overflow-x: auto; 
-    font-size: 0.9rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-borde);
 }
 #instrucciones-texto {
-    font-size: 1rem; /* Tamaño de texto base para móvil */
+    font-size: 1rem; 
     line-height: 1.7;
 }
 #instrucciones-texto ol {
@@ -244,48 +202,36 @@ pre {
 #instrucciones-texto li {
     margin-bottom: 15px;
 }
-
-/* --- Oculta el bloque JSON al tejedor --- */
-#json-container {
-    display: none;
+#instrucciones-texto ul { /* Para las sub-listas de sisa/escote */
+    margin-top: 10px;
+    font-size: 0.95rem;
 }
 
+/* Oculta el bloque JSON y Alertas */
+#json-container,
+.alert-critical {
+    display: none;
+}
+/* Muestra errores en el cuadro de instrucciones */
+#instrucciones-texto.alert-critical {
+    display: block;
+    background-color: #fff8f8;
+    border: 1px solid #e87a5e;
+    color: #c53030;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+}
 
-/* ------------------------------------------- */
-/* --- ESTILOS PARA ESCRITORIO (Media Query) --- */
-/* ------------------------------------------- */
+/* --- Estilos de Escritorio --- */
 @media (min-width: 600px) {
-    body {
-        padding: 20px; /* Re-añadimos padding al body en escritorio */
-    }
-
     .container {
-        max-width: 700px; /* Límite de ancho en escritorio */
-        padding: 20px 40px; /* Padding de escritorio */
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        min-height: auto; /* Altura automática en escritorio */
+        max-width: 700px;
     }
-
-    h1 {
-        font-size: 2.5rem; /* Título más grande en escritorio */
+    .form-section {
+        padding: 20px 25px;
     }
-    
-    h2 {
-         font-size: 2rem;
-    }
-
-    .step-indicator {
-        font-size: 0.9rem;
-    }
-
-    #instrucciones-texto {
-        font-size: 1.1rem; /* Texto de instrucciones más grande */
-    }
-
-    /* Botones recuperan su tamaño natural */
-    .nav-buttons button {
-        flex-grow: 0; 
-        flex-basis: auto;
+    .toggle-group label {
+        min-width: 150px; /* Más ancho en escritorio */
     }
 }
