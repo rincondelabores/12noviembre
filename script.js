@@ -1,4 +1,4 @@
-// --- BASE DE DATOS DE TALLAS (ACTUALIZADA con 3 nuevas columnas) ---
+// --- BASE DE DATOS DE TALLAS (CON NUEVAS MEDIDAS) ---
 const SIZING_DATABASE = {
     // Bebés
     "primera-puesta": { display: "Primera Puesta", pecho: 40, cuello: 25.0, sisa: 10.0, manga: 15, cuerpo: 16, muneca: 9.0, contorno_brazo: 15, ancho_escote: 10, caida_escote: 4.5 },
@@ -38,8 +38,7 @@ function distribuirRagland(totalPuntos, esChaqueta) {
     let puntosEspalda, puntosDelantero, puntosManga;
     let puntosRaglan = 4; // Los 4 puntos de las líneas de raglán (1p en cada línea)
     
-    // Validar que hay suficientes puntos
-    if (totalPuntos <= (puntosRaglan + 3)) { // Necesita al menos 1p por sección + raglán
+    if (totalPuntos <= (puntosRaglan + 3)) { 
         throw new Error(`Puntos de montaje insuficientes (${totalPuntos}p). Se necesita un mínimo de 8p para repartir. Revisa la muestra o el cuello.`);
     }
     
@@ -47,14 +46,14 @@ function distribuirRagland(totalPuntos, esChaqueta) {
 
     // 2. Reparto inicial 1/3
     let parte = Math.floor(puntosARepartir / 3);
-    let sobrante = puntosARepartir % 3; // Puede ser 0, 1 o 2
+    let sobrante = puntosARepartir % 3; 
 
     // Inicialización base
     puntosEspalda = parte;
-    puntosDelantero = parte; // Total para el/los delanteros
-    puntosManga = parte;     // Total para las dos mangas
+    puntosDelantero = parte; 
+    puntosManga = parte;     
 
-    // 3. Gestión del Sobrante (Tu regla: 1 para espalda, si hay 2, 1 del y 1 esp)
+    // 3. Gestión del Sobrante
     if (sobrante === 1) {
         puntosEspalda += 1;
     } else if (sobrante === 2) {
@@ -63,40 +62,34 @@ function distribuirRagland(totalPuntos, esChaqueta) {
     }
 
     // 4. Ajustar Delantero y Mangas
-    
-    // 4.1. Delantero (Si es chaqueta, debe ser par para dividir en dos)
     if (esChaqueta) {
         if (puntosDelantero % 2 !== 0) {
-            // Si es impar, le damos 1 punto (quitándoselo a la espalda)
             puntosDelantero += 1;
             puntosEspalda -= 1; 
         }
-        puntosDelantero = Math.floor(puntosDelantero / 2); // Repartir el delantero en dos (Delantero Izq y Der)
+        puntosDelantero = Math.floor(puntosDelantero / 2); 
     }
     
-    // 4.2. Mangas (El total de mangas debe ser par para dividir en dos)
     if (puntosManga % 2 !== 0) {
-        puntosManga -= 1; // Quitar 1 punto de la manga total
-        puntosEspalda += 1; // Dárselo a la espalda (según tu regla)
+        puntosManga -= 1; 
+        puntosEspalda += 1;
     }
-    puntosManga = Math.floor(puntosManga / 2); // Repartir la manga total en dos (Manga 1 y Manga 2)
+    puntosManga = Math.floor(puntosManga / 2); 
 
     // 5. Devolver Resultado
     let chequeo = (esChaqueta ? (puntosDelantero * 2) : puntosDelantero) + puntosEspalda + (puntosManga * 2) + 4;
     
     if (chequeo !== totalPuntos) {
-         console.warn(`Error de lógica en el reparto de raglán. Total no coincide. ${chequeo} !== ${totalPuntos}`);
-         // Ajuste final por si el redondeo quitó puntos
          let diferencia = totalPuntos - chequeo;
-         puntosEspalda += diferencia; // El ajuste final siempre a la espalda
+         puntosEspalda += diferencia; 
          chequeo = (esChaqueta ? (puntosDelantero * 2) : puntosDelantero) + puntosEspalda + (puntosManga * 2) + 4;
     }
     
     return {
         puntoRagland: 1, 
         espalda: puntosEspalda,
-        delantero: puntosDelantero, // Es el total (Jersey) o la mitad (Chaqueta)
-        manga: puntosManga, // Es una manga
+        delantero: puntosDelantero, 
+        manga: puntosManga, 
         esChaqueta: esChaqueta,
         puntosTotalesChequeo: chequeo
     };
@@ -107,72 +100,12 @@ function distribuirRagland(totalPuntos, esChaqueta) {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- 1. MANEJO DE LA INTERFAZ (UI) DE PASOS ---
+    // --- 1. MANEJO DE LA INTERFAZ (UI) DE PANTALLA ÚNICA ---
     
-    const steps = document.querySelectorAll('.step');
-    const indicators = document.querySelectorAll('.step-indicator');
-    const nextButtons = document.querySelectorAll('.btn-next');
-    const prevButtons = document.querySelectorAll('.btn-prev');
     const form = document.getElementById('calc-form');
-    const btnStartOver = document.querySelector('.btn-start-over');
+    const resultadoContainer = document.getElementById('resultado-container');
+    const btnModificar = document.getElementById('btn-modificar');
     
-    let currentStep = 1;
-
-    function showStep(stepNumber) {
-        steps.forEach((step, index) => {
-            step.classList.toggle('active', (index + 1) === stepNumber);
-        });
-        indicators.forEach((indicator, index) => {
-            indicator.classList.toggle('active', (index + 1) === stepNumber);
-        });
-        currentStep = stepNumber;
-    }
-
-    nextButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            if (currentStep < 4) {
-                showStep(currentStep + 1);
-            }
-        });
-    });
-
-    // Maneja TODOS los botones "btn-prev" (los de Volver y Modificar Datos)
-    prevButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            if (currentStep > 1) {
-                showStep(currentStep - 1);
-            }
-        });
-    });
-    
-    btnStartOver.addEventListener('click', () => {
-        showStep(1);
-        form.reset(); 
-    });
-    
-
-    // --- 2. VALIDACIÓN EN TIEMPO REAL ---
-
-    const ptsInput = document.getElementById('pts10');
-    const rowsInput = document.getElementById('rows10');
-    const ptsWarning = document.getElementById('pts-warning');
-    const rowsWarning = document.getElementById('rows-warning');
-
-    function validateMuestra(input, warningEl) {
-        const value = parseFloat(input.value);
-        if (value > 0 && (value < 4 || value > 50)) {
-            warningEl.style.display = 'block';
-            input.style.borderColor = '#c53030';
-        } else {
-            warningEl.style.display = 'none';
-            input.style.borderColor = 'var(--color-borde)';
-        }
-    }
-
-    ptsInput.addEventListener('input', () => validateMuestra(ptsInput, ptsWarning));
-    rowsInput.addEventListener('input', () => validateMuestra(rowsInput, rowsWarning));
-
-
     // --- 3. LÓGICA DE CÁLCULO AL ENVIAR EL FORMULARIO ---
 
     form.addEventListener('submit', (e) => {
@@ -182,13 +115,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
             generarPatron(data);
+            
+            // Mostrar resultados y ocultar formulario
+            form.style.display = 'none';
+            resultadoContainer.style.display = 'block';
+            window.scrollTo(0, 0); // Subir al inicio
+
         } catch (error) {
             console.error(error); 
             mostrarError(`Error crítico en el cálculo: ${error.message}`);
+            // Mostrar resultados (con el error) y ocultar formulario
+            form.style.display = 'none';
+            resultadoContainer.style.display = 'block';
+            window.scrollTo(0, 0); // Subir al inicio
         }
-        
-        showStep(4);
     });
+
+    // --- 4. LÓGICA DEL BOTÓN "MODIFICAR DATOS" ---
+    btnModificar.addEventListener('click', () => {
+        // Ocultar resultados y mostrar formulario
+        resultadoContainer.style.display = 'none';
+        form.style.display = 'block';
+    });
+
 
     /**
      * Función principal que genera el patrón.
@@ -203,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const tipoPrenda = data.tipo_prenda; // 'chaqueta' o 'jersey'
         const esChaqueta = (tipoPrenda === 'chaqueta');
 
-        // --- B. COMPROBACIONES Y LÓGICA DE MVP ---
+        // --- B. COMPROBACIONES ---
         const tallaData = SIZING_DATABASE[tallaId];
         
         if (!tallaData) {
@@ -219,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let jsonOutput;
         const pts_cm = pts10 / 10;
         const rows_cm = rows10 / 10;
+        // TODO: Leer holgura del 'data.ajuste'
         const ease_cm = 5.0; // Holgura "normal" (Simplificado)
 
         if (metodo === 'top-down') {
@@ -293,14 +243,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // --- C.2 LÓGICA BOTTOM-UP (MANGA CAÍDA) ---
             
             // 1. Cálculos de Manga (Puño a Sisa)
-            const puntos_puño_cm = tallaData.muneca + 2;
-            const puntos_puño = Math.round((puntos_puño_cm * pts_cm) / 2) * 2; // Par
-            const puntos_brazo_cm = tallaData.contorno_brazo + ease_cm;
-            const puntos_brazo_final = Math.round((puntos_brazo_cm * pts_cm) / 2) * 2; // Par
+            const puntos_puño = Math.round(((tallaData.muneca + 2) * pts_cm) / 2) * 2;
+            const puntos_brazo_final = Math.round(((tallaData.contorno_brazo + ease_cm) * pts_cm) / 2) * 2;
             const puntos_a_aumentar_total = puntos_brazo_final - puntos_puño;
             const num_aumentos_pares = puntos_a_aumentar_total / 2;
-            const pasadas_manga_total = Math.round((tallaData.manga + tallaData.sisa) * rows_cm); // Largo total de manga
-            const pasadas_para_aumentar = pasadas_manga_total - 10; // Dejar 10 pasadas para puño
+            const pasadas_manga_total = Math.round((tallaData.manga + tallaData.sisa) * rows_cm);
+            const pasadas_para_aumentar = pasadas_manga_total - 10;
             
             let frecuencia_aumento_manga = 0;
             if (num_aumentos_pares > 0) {
@@ -327,7 +275,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const puntos_escote_central = Math.round(puntos_escote_total / 2); // 1/2 Central
             const puntos_escote_lados_total = puntos_escote_total - puntos_escote_central;
             const puntos_escote_lado = Math.floor(puntos_escote_lados_total / 2); // 1/4 para cada curva
-            // Ajustar el central si el total era impar
             const puntos_escote_central_ajustado = puntos_escote_total - (puntos_escote_lado * 2);
             
             const menguado_3_2 = 5; // 3p + 2p
@@ -336,15 +283,20 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const puntos_hombro = Math.floor((puntos_montaje_cuerpo - puntos_escote_total) / 2);
 
-            let instruccion_escote_delantero = "";
+            // 4. Instrucciones condicionales (Jersey vs Chaqueta)
+            let inst_espalda = `1. **Espalda:** Montar **${puntos_montaje_cuerpo}** puntos. Tejer elástico (2-3 cm) y continuar recto.`;
+            let inst_delantero, inst_escote;
+
             if (esChaqueta) {
-                // Chaqueta: Pieza es la mitad. No hay cierre central.
                 const puntos_montaje_chaqueta_del = Math.round(puntos_montaje_cuerpo / 2);
                 const puntos_hombro_chaqueta = puntos_montaje_chaqueta_del - puntos_escote_lado;
-                instruccion_escote_delantero = `(CHAQUETA) Teje **${puntos_montaje_chaqueta_del}p** (incluyendo tapeta). A la **pasada ${pasadas_inicio_escote}**, para el escote (lado tapeta), mengua 3p, luego 2p, y luego 1p cada 2 pasadas (${puntos_menguado_1p} veces). Continúa recto con los **${puntos_hombro_chaqueta}p** del hombro hasta la pasada ${pasadas_totales_cuerpo}. Cierra.`;
-            } else {
-                // Jersey: Pieza entera
-                instruccion_escote_delantero = `(JERSEY) A la **pasada ${pasadas_inicio_escote}**, para el escote:
+                
+                inst_delantero = `4. **Delanteros (Tejer 2):** Montar **${puntos_montaje_chaqueta_del}** puntos. Tejer elástico y continuar recto, igual que la espalda.`;
+                inst_escote = `5. **Escote Delantero:** A la **pasada ${pasadas_inicio_escote}**, en el borde del escote (el que no es la sisa), mengua 3p, luego 2p, y luego 1p cada 2 pasadas (${puntos_menguado_1p} veces). Continúa recto con los **${puntos_hombro_chaqueta}p** del hombro hasta la pasada ${pasadas_totales_cuerpo}. Cierra.`;
+            
+            } else { // Es Jersey
+                inst_delantero = `4. **Delantero:** Montar **${puntos_montaje_cuerpo}** puntos. Tejer igual que la espalda hasta el escote.`;
+                inst_escote = `5. **Escote Delantero:** A la **pasada ${pasadas_inicio_escote}**, para el escote:
                 <ul><li>Cierra los **${puntos_escote_central_ajustado}** puntos centrales.</li>
                 <li>**Lado 1:** Mengua (lado escote) 3p, luego 2p, y luego 1p cada 2 pasadas (${puntos_menguado_1p} veces).</li>
                 <li>Continúa recto con los **${puntos_hombro}p** del hombro hasta la pasada ${pasadas_totales_cuerpo}. Cierra.</li>
@@ -354,53 +306,61 @@ document.addEventListener('DOMContentLoaded', () => {
             jsonOutput = {
                 "resumen": `(Bottom-Up) Tejer 4 piezas. **Espalda/Delantero:** Montar **${puntos_montaje_cuerpo}p** y tejer ${pasadas_totales_cuerpo} pasadas. **Mangas (x2):** Empezar con **${puntos_puño}p** y aumentar hasta **${puntos_brazo_final}p**. Coser todo al final.`,
                 "instrucciones": [
-                    `1. **Espalda:** Montar **${puntos_montaje_cuerpo}** puntos. Tejer elástico (2-3 cm) y continuar recto.`,
-                    `2. **Sisa Espalda:** A la **pasada ${pasadas_hasta_sisa}** (aprox ${tallaData.cuerpo} cm), marca el inicio de la sisa. Teje recto ${pasadas_de_sisa} pasadas más (hasta ${pasadas_totales_cuerpo} pasadas totales). (Opcional: puedes cerrar ${puntos_cierre_sisa_opcional}p al inicio de las 2 primeras pasadas de sisa para una manga más metida).`,
-                    `3. **Hombros Espalda:** Cierra todos los puntos. (Nota: Se puede implementar cierre de hombros recto o con ligera caída).`,
-                    `4. **Delantero:** Montar **${puntos_montaje_cuerpo}** puntos (si es Jersey) o **${Math.round(puntos_montaje_cuerpo / 2)}p** (si es Chaqueta, tejer 2 piezas). Teje igual que la espalda hasta el escote.`,
-                    `5. **Escote Delantero:** ${instruccion_escote_delantero}`,
+                    inst_espalda,
+                    `2. **Sisa Espalda:** A la **pasada ${pasadas_hasta_sisa}** (aprox ${tallaData.cuerpo} cm), marca el inicio de la sisa. Teje recto ${pasadas_de_sisa} pasadas más (hasta ${pasadas_totales_cuerpo} pasadas totales). (Opcional: puedes cerrar ${puntos_cierre_sisa_opcional}p al inicio de las 2 primeras pasadas de sisa).`,
+                    `3. **Hombros Espalda:** Cierra todos los puntos.`,
+                    inst_delantero,
+                    inst_escote,
                     `6. **Mangas (Tejer 2):** Montar **${puntos_puño}** puntos. Tejer elástico (3-4 cm).`,
                     `7. **Aumentos Manga:** ${instruccion_aumento_manga}`,
-                    `8. **Montaje:** Coser un hombro. Recoger puntos del escote (espalda y delantero) y tejer la tira de elástico. Coser el otro hombro y la tira. Coser las mangas al cuerpo y cerrar costados.`
+                    `8. **Acabado y Montaje:** Cose un hombro. Para el cuello, puedes **Opción A:** Recoger puntos alrededor del escote y tejer el elástico. **Opción B:** Tejer una tira de elástico por separado y coserla. Cose el otro hombro y la tira. Coser las mangas al cuerpo y cerrar costados y mangas.`
                 ]
             };
             
         } else {
-            // Seguridad por si se añade otro método
-            throw new Error("El método seleccionado no es ni Top-Down ni Bottom-Up.");
+            throw new Error("Método no reconocido.");
         }
         
-        // --- D. GENERAR SALIDA ---
+        // --- D. AÑADIR TAPETA OPCIONAL (SI ES CHAQUETA) ---
+        if (esChaqueta) {
+            const puntos_tapeta_cm = 2.5; // Ancho estándar de tapeta
+            const puntos_tapeta = Math.round(puntos_tapeta_cm * pts_cm);
+            jsonOutput.instrucciones.push(`9. **Tapeta (Opcional):** Recoge puntos (aprox. 3p por cada 4 pasadas) a lo largo de ambos bordes delanteros. Teje en elástico (unos ${puntos_tapeta}p de ancho) la banda de botones y ojales.`);
+        }
+
+        // --- E. GENERAR SALIDA HTML ---
         
-        // Generar el texto HTML a partir del JSON (limpio)
         const textoHTML = `
             <ol>
                 ${jsonOutput.instrucciones.map(paso => `<li>${paso.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('')}
             </ol>
         `;
 
-        // Mostrar los resultados
         mostrarResultados(jsonOutput, textoHTML);
     }
 
-    // --- FUNCIONES DE VISUALIZACIÓN (Muestran los resultados o el error) ---
+    // --- FUNCIONES DE VISUALIZACIÓN (Muestran resultados o error) ---
 
     function mostrarResultados(json, textoHTML) {
         // Limpiamos por si había un error previo
-        document.getElementById('instrucciones-texto').classList.remove('alert-critical');
+        const instruxBox = document.getElementById('instrucciones-texto');
+        instruxBox.classList.remove('alert-critical');
+        instruxBox.innerHTML = ''; // Limpiar
         
         // Usamos innerHTML para el resumen para que pille las negritas
         document.getElementById('resumen-texto').innerHTML = json.resumen.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Dejamos el JSON interno para depuración (está oculto por CSS)
         document.getElementById('json-output').textContent = JSON.stringify(json, null, 2); 
-        document.getElementById('instrucciones-texto').innerHTML = textoHTML;
+        // Ponemos las instrucciones
+        instruxBox.innerHTML = textoHTML;
     }
 
     function mostrarError(mensaje) {
         document.getElementById('resumen-texto').textContent = "Error en el cálculo";
         document.getElementById('json-output').textContent = `{ "error": "${mensaje}" }`;
-        // Mostramos el error en la caja de instrucciones para que sea bien visible
+        // Mostramos el error en la caja de instrucciones
         const errorBox = document.getElementById('instrucciones-texto');
         errorBox.innerHTML = `<p>${mensaje}</p>`;
-        errorBox.classList.add('alert-critical'); // Usamos la clase de error que ya definimos
+        errorBox.classList.add('alert-critical'); 
     }
 });
