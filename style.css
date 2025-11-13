@@ -1,8 +1,8 @@
 /* --- Paleta de Colores --- */
 :root {
-    --color-principal: #3E8A85;
-    --color-fondo: #FDFBF5;
-    --color-acento: #E87A5E;
+    --color-principal: #D9C0C0; /* CAMBIO: Rosa Empolvado */
+    --color-fondo: #FDFBF5; 
+    --color-acento: #4A698F; /* CAMBIO: Azul Bonito */
     --color-texto: #333;
     --color-texto-claro: #555;
     --color-borde: #DDD;
@@ -19,18 +19,18 @@ body {
 }
 
 h1 {
-    font-family: 'Caveat', cursive;
+    font-family: 'Dancing Script', cursive; /* CAMBIO: Fuente */
     font-weight: 700;
-    color: var(--color-principal);
-    font-size: 2.2rem;
+    color: var(--color-texto); /* Título en negro para más contraste */
+    font-size: 2.5rem;
     text-align: center;
     margin: 0 0 5px 0;
 }
 h2 {
-    font-family: 'Caveat', cursive;
-    font-size: 2rem;
-    color: var(--color-principal);
-    border-bottom: 2px solid var(--color-acento);
+    font-family: 'Dancing Script', cursive; /* CAMBIO: Fuente */
+    font-size: 2.2rem;
+    color: var(--color-acento); /* Azul */
+    border-bottom: 2px solid var(--color-principal); /* Rosa */
     padding-bottom: 5px;
 }
 header p {
@@ -56,14 +56,23 @@ header p {
     padding: 15px;
     margin-bottom: 20px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    /* Transición para habilitar/deshabilitar */
+    transition: opacity 0.3s ease;
 }
 .form-section legend {
-    font-family: 'Caveat', cursive;
-    font-size: 1.5rem;
+    font-family: 'Dancing Script', cursive; /* CAMBIO: Fuente */
+    font-size: 1.6rem;
     font-weight: 700;
     color: var(--color-texto-claro);
     padding: 0 10px;
 }
+/* (NUEVO) Estilo para deshabilitar secciones */
+.form-section.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  background: #f9f9f9;
+}
+
 
 .form-group {
     margin-bottom: 15px;
@@ -80,12 +89,14 @@ header p {
 .form-group-inline {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 10px 15px;
     align-items: center;
 }
 .form-group-inline label {
     margin-bottom: 0;
     font-weight: 400;
+    font-size: 0.9rem;
+    color: var(--color-texto-claro);
 }
 .form-group-inline input {
     text-align: center;
@@ -103,9 +114,21 @@ select {
     font-size: 1rem;
 }
 input:focus, select:focus {
-    border-color: var(--color-principal);
+    border-color: var(--color-acento); /* Azul */
     outline: none;
-    box-shadow: 0 0 5px rgba(62, 138, 133, 0.3);
+    box-shadow: 0 0 5px rgba(74, 105, 143, 0.3);
+}
+
+/* (NUEVO) Cuadro de Info de Talla */
+#talla-info-box {
+    display: none; /* Oculto por defecto */
+    background: var(--color-fondo);
+    border: 1px dashed var(--color-borde);
+    border-radius: 5px;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: var(--color-texto-claro);
 }
 
 /* --- Selectores Toggle (Radio) --- */
@@ -118,7 +141,7 @@ input:focus, select:focus {
     display: none; 
 }
 .toggle-group label {
-    flex: 1; /* Ocupa el espacio disponible */
+    flex: 1; 
     min-width: 120px;
     padding: 12px 15px;
     border: 1px solid var(--color-borde);
@@ -127,10 +150,11 @@ input:focus, select:focus {
     transition: all 0.2s ease;
     font-weight: 600;
     text-align: center;
+    font-size: 0.9rem; 
 }
 .toggle-group input[type="radio"]:checked + label {
-    background-color: var(--color-principal);
-    color: #fff;
+    background-color: var(--color-principal); /* Rosa */
+    color: var(--color-texto); /* Texto oscuro para mejor lectura */
     border-color: var(--color-principal);
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
@@ -156,17 +180,17 @@ button {
     padding: 14px 20px;
     border: none;
     border-radius: 5px;
-    font-size: 1.1rem; /* Más grande */
+    font-size: 1.1rem;
     cursor: pointer;
     font-weight: 600;
     transition: all 0.2s ease;
-    flex: 1; /* Ocupa todo el ancho */
+    flex: 1;
 }
 button.btn-submit {
-    background-color: var(--color-acento);
+    background-color: var(--color-acento); /* Azul */
     color: #fff;
-    font-family: 'Caveat', cursive;
-    font-size: 1.5rem;
+    font-family: 'Dancing Script', cursive; /* CAMBIO: Fuente */
+    font-size: 1.7rem; /* Más grande y llamativo */
 }
 button.btn-submit:hover {
     opacity: 0.85;
@@ -176,9 +200,15 @@ button#btn-modificar {
     color: var(--color-texto-claro);
 }
 
+/* --- (NUEVO) Calculadora Rápida (Oculta) --- */
+#calculadora-rapida-group {
+    display: none;
+    border-color: var(--color-acento); /* Borde Azul */
+}
+
 /* --- Contenedor de Resultados (Oculto por defecto) --- */
 #resultado-container {
-    display: none; /* Oculto hasta calcular */
+    display: none; 
 }
 #resumen-container {
     background: var(--color-fondo);
@@ -202,7 +232,7 @@ button#btn-modificar {
 #instrucciones-texto li {
     margin-bottom: 15px;
 }
-#instrucciones-texto ul { /* Para las sub-listas de sisa/escote */
+#instrucciones-texto ul { 
     margin-top: 10px;
     font-size: 0.95rem;
 }
@@ -232,6 +262,6 @@ button#btn-modificar {
         padding: 20px 25px;
     }
     .toggle-group label {
-        min-width: 150px; /* Más ancho en escritorio */
+        min-width: 150px; 
     }
 }
